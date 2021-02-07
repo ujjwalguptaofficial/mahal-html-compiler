@@ -1,0 +1,16 @@
+export enum HTML_TAG {
+    div = 1,
+    p = 1,
+    b = 1,
+    span = 1,
+    input = 1,
+    u = 1,
+    button = 1,
+    table = 1,
+    tr = 1,
+    td = 1,
+    thead = 1,
+    tbody = 1,
+    tfoot = 1,
+    strong = 1,
+}
