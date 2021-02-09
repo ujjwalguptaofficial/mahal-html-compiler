@@ -250,7 +250,9 @@ export function createRenderer(template: string) {
         return str;
     }
     parentStr += `return ${createJsEqFromCompiled(compiledParent)}`;
-    parentStr = beautify(parentStr, { indent_size: 4, space_in_empty_paren: true })
-    console.log("parentstr", parentStr);
+    if (process.env.NODE_ENV != "production") {
+        parentStr = beautify(parentStr, { indent_size: 4, space_in_empty_paren: true })
+    }
+    // console.log("parentstr", parentStr);
     return new Function('ce', 'ct', 'f', 'he', 'hForE', parentStr);
 }

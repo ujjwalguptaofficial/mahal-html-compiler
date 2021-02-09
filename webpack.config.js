@@ -18,8 +18,8 @@ module.exports = {
         extensions: ['.tsx', '.ts', '.js']
     },
     output: {
-        filename: 'template_compiler.js',
-        path: path.resolve(process.cwd(), 'src/'),
+        filename: 'compiler.js',
+        path: path.resolve(process.cwd(), 'dist/'),
         library: 'tajHtmlCompiler',
         libraryTarget: "commonjs2"
     },

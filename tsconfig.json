@@ -1,18 +1,20 @@
 {
   "compilerOptions": {
-    "baseUrl": "",
-    "declaration": false,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
+    "noImplicitAny": false,
+    "noEmitOnError": true,
+    "removeComments": false,
+    "sourceMap": true,
+    "inlineSources": true,
+    "moduleResolution": "node",
+    "target": "es5",
+    "preserveConstEnums": true,
+    "declaration": true,
+    "module": "es6",
+    "outDir": "dist/ts",
     "lib": [
-      "es6",
+      "es2015",
       "dom"
     ],
-    "mapRoot": "./",
-    "module": "es6",
-    "moduleResolution": "node",
-    "outDir": "dist/out-tsc",
-    "sourceMap": true,
-    "target": "es5"
+    "experimentalDecorators": true
   }
 }
