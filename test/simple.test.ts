@@ -35,4 +35,19 @@ describe('simple', function () {
           <div>Ujjwal</div>
         </div>`);
     })
+
+    it('bind value', () => {
+        createRenderer(`<div>
+        Standard Text box
+           <input type="text" :value="value" on:input="onInput" />
+        </div>`);
+    })
+
+    it('model', () => {
+        createRenderer(`<div>
+        <input type="text" #model(text) />
+     </div>`);
+    })
+
+    
 })

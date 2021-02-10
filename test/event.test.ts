@@ -1,6 +1,6 @@
 import { createRenderer } from "../src/index";
 
-describe('simple', function () {
+describe('Event', function () {
     it('on:click on div', () => {
         createRenderer(`<div on:click="handleClick">Click me</div>`)
     })

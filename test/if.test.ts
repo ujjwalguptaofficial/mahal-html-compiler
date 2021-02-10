@@ -1,0 +1,59 @@
+import { createRenderer } from "../src/index";
+
+describe('If', function () {
+
+    it('if simple', () => {
+        createRenderer(`<div #if(name)>Click me</div>`)
+    })
+
+    it('if with on event', () => {
+        createRenderer(`<div #if(name) on:click="handleClick">Click me</div>`)
+    })
+
+    it('multiple if', () => {
+        createRenderer(`<div>
+        <div #if(cond1)></div>
+        <div #if(cond2)></div>
+        </div>
+        `)
+    })
+
+    it('if else', () => {
+        createRenderer(`
+        <div #if(cond1)></div>
+        <div #else ></div>
+        `)
+    })
+
+    it('if & else if', () => {
+        createRenderer(`<div>
+        <div #if(cond1)></div>
+        <div #else-if(cond2)></div>
+        </div>
+        `)
+    })
+
+    it('if else if else', () => {
+        createRenderer(`<div>
+        <div #if(cond1)></div>
+        <div #else-if(cond2)></div>
+        <div #else-if(cond3)></div>
+        <div #else-if(cond4)></div>
+        <div #else></div>
+        </div>
+        `)
+    })
+
+    it('complex example1', () => {
+        createRenderer(`<div :stateAttr="state" #addClass({'state-0':state===0,'state-1':state===1,'state-gt-10':state>10,'nested-3':nested.nested1.nested2.nested3==0})>
+        <div #addClass('state--0','state--01') #if(state==0)>0th{{state}}</div>
+        <div #else-if(state==1)>1st{{state}}</div>
+        <div #else-if(state===2)>{{state | dollar}}</div>
+        <Btn #else-if(state<=3) label='ok'></Btn>
+        <Btn #else-if(state>=4 && state<anotherState) label='Hello'></Btn>
+        <Btn #else-if(state===nested.nested1.nested2.nested3) label='10'></Btn>
+        <div #else>{{state}}</div>
+     </div>
+        `)
+    })
+})
