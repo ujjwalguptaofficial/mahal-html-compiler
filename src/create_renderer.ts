@@ -7,7 +7,7 @@ import { unique } from "./unique";
 import { addCtxToExpression } from "./add_ctx_to_expression";
 import { removeCommaFromLast } from "./remove_comma_from_last";
 import { convertArrayToString } from "./convert_array_to_comma_seperated_string";
-var beautify = require('js-beautify');
+import beautify from 'js-beautify';
 
 export function createRenderer(template: string) {
     const compiledParent = parseview(template);
