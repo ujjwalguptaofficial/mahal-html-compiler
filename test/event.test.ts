@@ -34,4 +34,15 @@ describe('Event', function () {
         </div>
         `)
     })
+
+    it('example 1', () => {
+        createRenderer(`
+        <div>
+        <div>{{counter}}</div>
+        <div>
+                <button on:click="increment">Increment</button>
+        </div>
+   </div>
+        `)
+    })
 })
