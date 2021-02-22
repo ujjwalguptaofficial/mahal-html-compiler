@@ -6,7 +6,7 @@ const banner = require('../build_helper/license');
 module.exports = {
     entry: path.resolve(__dirname, '../src/index.ts'),
     devtool: 'source-map',
-    target: "node",
+    // target: "node",
     mode: "development",
     module: {
         rules: [{
@@ -16,7 +16,7 @@ module.exports = {
         }]
     },
     resolve: {
-        extensions: ['.tsx', '.ts', '.js']
+        extensions: ['.ts', '.js']
     },
     output: {
         filename: 'compiler.js',

@@ -4,3 +4,6 @@ build_helper
 build
 webpack.config.*
 node_modules
+
+#definition
+!dist/ts/src

@@ -16,5 +16,6 @@
       "dom"
     ],
     "experimentalDecorators": true
-  }
+  },
+  "include": ["src/*"]
 }
