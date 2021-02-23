@@ -1,4 +1,6 @@
 import { createRenderer } from "../src/index";
+import { expect } from "chai";
+
 
 describe('simple', function () {
     it('div with mustache expression', () => {
@@ -9,12 +11,17 @@ describe('simple', function () {
         createRenderer(`<div>ujjwal</div>`)
     })
 
-    it('div with unclosed tag', (done) => {
-        new Promise(() => {
-            createRenderer(`<div>`)
-        }).catch(() => {
-            done();
-        });
+    it('div with unclosed tag', () => {
+        try {
+            createRenderer(`<div>`);
+        } catch (error) {
+            expect(error.message).to.be.equal(`Expected <, close tag, html, or mustache expression but end of input found.`)
+        }
+        // new Promise(() => {
+        //     createRenderer(`<div>`)
+        // }).then(done).catch(() => {
+        //     done();
+        // });
     })
 
     it('div with self closing tag', () => {
@@ -49,5 +56,11 @@ describe('simple', function () {
      </div>`);
     })
 
-    
+    it('tag with "-"', () => {
+        createRenderer(`<div>
+        <in-place of="name" />
+     </div>`);
+    })
+
+
 })

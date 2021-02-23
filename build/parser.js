@@ -269,8 +269,8 @@ function peg$parse(input, options) {
       peg$c55 = /^[>]/,
       peg$c56 = peg$classExpectation([">"], false, false),
       peg$c57 = peg$otherExpectation("identifier"),
-      peg$c58 = /^[a-zA-Z$]/,
-      peg$c59 = peg$classExpectation([["a", "z"], ["A", "Z"], "$"], false, false),
+      peg$c58 = /^[a-zA-Z$_\-]/,
+      peg$c59 = peg$classExpectation([["a", "z"], ["A", "Z"], "$", "_", "-"], false, false),
       peg$c60 = function(val) {
       	return val.join("");
       },

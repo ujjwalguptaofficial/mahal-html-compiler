@@ -12,21 +12,27 @@ import beautify from 'js-beautify';
 export function createRenderer(template: string) {
     template = template.trim();
     let compiledParent;
-    try {
+    if (process.env.NODE_ENV == "test") {
         compiledParent = parseview(template);
-    } catch (ex) {
-        let string = "";
-        string += "const template=`" + JSON.stringify(template) + "`;"
-        string += `const location=${JSON.stringify(ex.location)};`;
-        string += `const css = 'background: #222; color: #bada55';`;
-        string += `const lines = template.split("\\n");`
-        string += ` console.log("%c" + lines.slice(0, location.start.line - 1).join("\\n") +
-        "%c" + lines.slice(location.start.line - 1, location.end.line).join("\\n") +
-        "%c" + lines.slice(location.end.line).join("\\n")
-        , css, css + ';color:#ff0000', css);`;
-        string += `return document.createComment('');`
-        return new Function(string);
     }
+    else {
+        try {
+            compiledParent = parseview(template);
+        } catch (ex) {
+            let string = `console.error(${ex.message})`;
+            string += "const template=`" + JSON.stringify(template) + "`;"
+            string += `const location=${JSON.stringify(ex.location)};`;
+            string += `const css = 'background: #222; color: #bada55';`;
+            string += `const lines = template.split("\\n");`
+            string += ` console.log("%c" + lines.slice(0, location.start.line - 1).join("\\n") +
+            "%c" + lines.slice(location.start.line - 1, location.end.line).join("\\n") +
+            "%c" + lines.slice(location.end.line).join("\\n")
+            , css, css + ';color:#ff0000', css);`;
+            string += `return document.createComment('');`
+            return new Function(string);
+        }
+    }
+
     // console.log("compiled", compiledParent);
     if (compiledParent.view) {
         if (compiledParent.view.forExp) {

@@ -1,4 +1,5 @@
 import { createRenderer } from "../src/index";
+import { expect } from "chai";
 
 describe('If', function () {
 
@@ -19,10 +20,15 @@ describe('If', function () {
     })
 
     it('if else', () => {
-        createRenderer(`
-        <div #if(cond1)></div>
-        <div #else ></div>
-        `)
+        try {
+            createRenderer(`
+            <div #if(cond1)></div>
+            <div #else ></div>
+            `)
+        } catch (error) {
+            expect(error.message).to.be.equal(`Expected end of input but "\\n" found.`)
+        }
+
     })
 
     it('if & else if', () => {

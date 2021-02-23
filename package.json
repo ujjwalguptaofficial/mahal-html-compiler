@@ -1,17 +1,18 @@
 {
   "name": "mahal-html-compiler",
   "displayName": "mahal-html-compiler",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "",
   "main": "dist/compiler.js",
   "types": "dist/ts/index.d.ts",
   "scripts": {
     "build:grammar": "node build_helper/grammar.js",
     "start": "npm run dev",
+    "test:mahal": "npm pack && cd ../mahal && npm run pack:test",
     "test": "mochapack --require ./test/setup.js --webpack-config webpack/webpack.config.test.js \"test/**/*.test.ts\"",
     "build": "npm run build:grammar && webpack --config webpack/webpack.config.js",
     "build:pack": "npm run build && npm pack",
-    "deploy": "npm run build && npm run test"
+    "deploy": "npm run build && npm run test && npm run test:mahal"
   },
   "repository": {
     "type": "git",

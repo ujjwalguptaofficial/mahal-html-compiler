@@ -110,7 +110,7 @@ StartCloseTag "</" = [<][/];
 EndTag ">" = [>];
 
 
-Identifier "identifier"= val:[a-zA-Z\$]+ {
+Identifier "identifier"= val:[a-zA-Z\$\_\-]+ {
 	return val.join("");
 }
 
