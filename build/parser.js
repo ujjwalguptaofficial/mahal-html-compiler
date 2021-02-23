@@ -269,8 +269,8 @@ function peg$parse(input, options) {
       peg$c55 = /^[>]/,
       peg$c56 = peg$classExpectation([">"], false, false),
       peg$c57 = peg$otherExpectation("identifier"),
-      peg$c58 = /^[a-zA-Z$_\-]/,
-      peg$c59 = peg$classExpectation([["a", "z"], ["A", "Z"], "$", "_", "-"], false, false),
+      peg$c58 = /^[a-zA-Z0-9$_\-]/,
+      peg$c59 = peg$classExpectation([["a", "z"], ["A", "Z"], ["0", "9"], "$", "_", "-"], false, false),
       peg$c60 = function(val) {
       	return val.join("");
       },
@@ -368,8 +368,8 @@ function peg$parse(input, options) {
       peg$c100 = /^[a-zA-Z0-9&=>{}() |[\]]/,
       peg$c101 = peg$classExpectation([["a", "z"], ["A", "Z"], ["0", "9"], "&", "=", ">", "{", "}", "(", ")", " ", "|", "[", "]"], false, false),
       peg$c102 = peg$otherExpectation("html"),
-      peg$c103 = /^[a-zA-Z0-9& .$\n\r"']/,
-      peg$c104 = peg$classExpectation([["a", "z"], ["A", "Z"], ["0", "9"], "&", " ", ".", "$", "\n", "\r", "\"", "'"], false, false),
+      peg$c103 = /^[a-zA-Z0-9& .$\n\r"'@]/,
+      peg$c104 = peg$classExpectation([["a", "z"], ["A", "Z"], ["0", "9"], "&", " ", ".", "$", "\n", "\r", "\"", "'", "@"], false, false),
       peg$c105 = function(val) {
       	return val.join("").replace(/[\n\r]/gm, "").replace(/\s\s+/g, ' ');
       },

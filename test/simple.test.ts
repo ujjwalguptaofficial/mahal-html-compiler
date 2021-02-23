@@ -62,5 +62,23 @@ describe('simple', function () {
      </div>`);
     })
 
+    it('numbers inside html tag', () => {
+        createRenderer(`<div>
+        1234
+     </div>`);
+    })
+
+    it('@ inside html tag', () => {
+        createRenderer(`<div>
+        @
+     </div>`);
+    })
+
+    it('h1tag', () => {
+        createRenderer(`<div>
+        <h1>Title</h1>
+     </div>`);
+    })
+
 
 })

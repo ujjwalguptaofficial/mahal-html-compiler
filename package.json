@@ -12,6 +12,7 @@
     "test": "mochapack --require ./test/setup.js --webpack-config webpack/webpack.config.test.js \"test/**/*.test.ts\"",
     "build": "npm run build:grammar && webpack --config webpack/webpack.config.js",
     "build:pack": "npm run build && npm pack",
+    "build:test": "npm run build && npm run test",
     "deploy": "npm run build && npm run test && npm run test:mahal"
   },
   "repository": {
