@@ -251,7 +251,7 @@ export function createRenderer(template: string) {
 
             let method = `()=>{return ct(`;
             let brackets = "";
-            compiled.filters.forEach(item => {
+            compiled.filters.reverse().forEach(item => {
                 method += `f('${item}',`
                 brackets += ")"
             });
