@@ -19,7 +19,7 @@ export function createRenderer(template: string) {
         try {
             compiledParent = parseview(template);
         } catch (ex) {
-            let string = `console.error(${ex.message})`;
+            let string = `console.error(${JSON.stringify(ex.message)});`;
             string += "const template=`" + JSON.stringify(template) + "`;"
             string += `const location=${JSON.stringify(ex.location)};`;
             string += `const css = 'background: #222; color: #bada55';`;
