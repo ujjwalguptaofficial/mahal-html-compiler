@@ -40,7 +40,12 @@ export function createRenderer(template: string) {
             throw new LogHelper(ERROR_TYPE.ForExpAsRoot).get();
         }
     }
-    let parentStr = `const ${contextString}= this;`;
+    let parentStr = `const ${contextString}= this;
+    const ce = renderer.createElement;
+    const ct = renderer.createTextNode;
+    const f = renderer.format;
+    const he = renderer.runExp;
+    `;
     const createJsEqFromCompiled = (compiled: ICompiledView) => {
         let str = "";
         if (compiled.view) {
@@ -205,12 +210,12 @@ export function createRenderer(template: string) {
                 const getRegex = (subStr) => {
                     return new RegExp(subStr, 'g');
                 }
-                return `...hForE('${keys[0]}',(${forExp.key},${forExp.index})=>{
+                return `...he((${forExp.key},${forExp.index})=>{
                             return ${
                     value.replace(getRegex(`ctx.${forExp.key}`), forExp.key).
                         replace(getRegex(`ctx.${forExp.index}`), forExp.index)
                     }
-                        },${unique()})
+                        },${convertArrayToString(keys)},'for')
                 `
                 //return forStr;
             }
@@ -236,7 +241,7 @@ export function createRenderer(template: string) {
                 else {
                     elseString = `ce()`;
                 }
-                str += `:${elseString} },${keysAsString},${unique()})`
+                str += `:${elseString} },${keysAsString})`
             }
             else {
                 if (compiled.view.forExp) {
@@ -276,5 +281,5 @@ export function createRenderer(template: string) {
         parentStr = beautify(parentStr, { indent_size: 4, space_in_empty_paren: true })
     }
     // console.log("parentstr", parentStr);
-    return new Function('ce', 'ct', 'f', 'he', 'hForE', parentStr);
+    return new Function('renderer', parentStr);
 }
