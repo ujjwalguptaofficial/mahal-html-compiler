@@ -80,5 +80,16 @@ describe('simple', function () {
      </div>`);
     })
 
+    it('a with href as #', () => {
+        createRenderer(`<div>
+        <a href="#">Title</a>
+     </div>`);
+    })
+
+    it('| in html', () => {
+        createRenderer(`<div>
+        <h1>Title | Ujjwal</h1>
+     </div>`);
+    })
 
 })

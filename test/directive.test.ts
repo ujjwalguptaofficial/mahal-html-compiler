@@ -1,4 +1,5 @@
 import { createRenderer } from "../src/index";
+console.log("env", process.env.NODE_ENV);
 
 describe('Directive', function () {
     it('example 1', () => {

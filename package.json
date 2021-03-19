@@ -1,19 +1,21 @@
 {
   "name": "mahal-html-compiler",
   "displayName": "mahal-html-compiler",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "",
-  "main": "dist/compiler.js",
+  "main": "dist/npm.export.js",
   "types": "dist/ts/index.d.ts",
   "scripts": {
     "build:grammar": "node build_helper/grammar.js",
     "start": "npm run dev",
     "test:mahal": "cd ../mahal && npm run pack:test",
     "test": "cross-env NODE_ENV=test mochapack --require ./test/setup.js --webpack-config webpack/webpack.config.test.js \"test/**/*.test.ts\"",
-    "build": "npm run build:grammar && webpack --config webpack/webpack.config.js",
-    "build:pack": "npm run build && npm pack",
-    "build:test": "npm run build && npm run test",
-    "deploy": "npm run build:pack && npm run test && npm run test:mahal"
+    "build": "npm run build:grammar && npm run webpack:dev",
+    "build:pack": "npm run build && npm run webpack:test && npm pack",
+    "webpack:dev": "webpack --config webpack/webpack.config.dev.js",
+    "webpack:test": "webpack --config webpack/webpack.config.test.js",
+    "build:test": "npm run build:pack && npm run test",
+    "deploy": "npm run build:test && npm run test:mahal"
   },
   "repository": {
     "type": "git",
@@ -28,6 +30,7 @@
   "devDependencies": {
     "@types/mocha": "^8.2.0",
     "chai": "^4.3.0",
+    "copy-webpack-plugin": "^6.1.1",
     "cross-env": "^7.0.3",
     "mocha": "^8.2.1",
     "mochapack": "^2.0.6",
@@ -37,6 +40,7 @@
     "typescript": "^4.1.3",
     "webpack": "^4.44.1",
     "webpack-cli": "^3.3.12",
+    "webpack-merge": "^5.7.3",
     "webpack-node-externals": "^2.5.2"
   },
   "dependencies": {

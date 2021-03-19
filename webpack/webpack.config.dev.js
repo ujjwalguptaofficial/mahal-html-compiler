@@ -5,14 +5,14 @@ const webpack = require('webpack');
 
 module.exports = merge(baseConfig, {
     output: {
-        filename: 'compiler.test.js',
+        filename: 'compiler.js',
         path: path.resolve(process.cwd(), 'dist/'),
         library: 'mahalHtmlCompiler',
         libraryTarget: "commonjs2"
     },
     plugins: [
         new webpack.DefinePlugin({
-            'process.env.NODE_ENV': "'test'",
+            'process.env.NODE_ENV': "'development'",
         })
     ]
 })

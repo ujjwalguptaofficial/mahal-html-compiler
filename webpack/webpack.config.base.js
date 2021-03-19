@@ -2,6 +2,7 @@ const path = require('path');
 const nodeExternals = require('webpack-node-externals');
 const SmartBannerPlugin = require('smart-banner-webpack-plugin');
 const banner = require('../build_helper/license');
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     entry: path.resolve(__dirname, '../src/index.ts'),
@@ -18,14 +19,13 @@ module.exports = {
     resolve: {
         extensions: ['.ts', '.js']
     },
-    output: {
-        filename: 'compiler.js',
-        path: path.resolve(process.cwd(), 'dist/'),
-        library: 'mahalHtmlCompiler',
-        libraryTarget: "commonjs2"
-    },
     plugins: [
         new SmartBannerPlugin(banner),
+        new CopyPlugin({
+            patterns: [
+                { from: 'build_helper', to: '' },
+            ],
+        }),
     ],
     externals: [nodeExternals()]
 };
