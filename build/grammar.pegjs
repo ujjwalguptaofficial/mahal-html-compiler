@@ -70,14 +70,17 @@ Directive "directive" = "#" name:Word value:DirectiveValue? {
    }};
 }
 
-DirectiveValue = "(" expFirst:Expression _* expRest:DirectiveRestValue* ")" {
+DirectiveValue = "(" expFirst:DirectiveParam _* expRest:DirectiveRestValue* ")" {
    expRest.unshift(expFirst);
    return expRest
 }
 
-DirectiveRestValue =  "," exp:Expression _* {
+
+DirectiveRestValue =  "," _* exp:DirectiveParam _* {
   return exp;
 }
+
+DirectiveParam = Expression/AnyValue
 
 If= "#if(" exp:Expression ")"{
    return {ifExp: {ifCond:exp}};
@@ -96,7 +99,7 @@ For= "#for("_* key:Identifier _* index:ForIndex?  _* "in" _* value:Expression _*
    }}
 }
 
-Attribute= isBind:":"? attr:Identifier _* "=" StringSymbol word:(Word/ObjectExpression) StringSymbol _*{
+Attribute= isBind:":"? attr:Identifier _* "=" StringSymbol word:Word StringSymbol _*{
    return {attr: {key:attr,value:word, isBind:isBind!=null}};
 }
 
@@ -115,9 +118,6 @@ StartCloseTag "</" = LtSymbol [/];
 GtSymbol ">" = [>];
 
 
-Identifier "identifier"= val:[a-zA-Z0-9\$\_\-]+ {
-	return val.join("");
-}
 
 MustacheExpression "mustache expression" = "{{" val:MustacheContent filters:Filter* _*  "}}"+ {
 	return {mustacheExp:val , filters};
@@ -170,36 +170,32 @@ EventModifier "event modifier" = "."  value:Identifier {
   return value;
 }
 
-Expression = ObjectExpression/(ExpressionWithConnector)*
-
-ObjectExpression = "{" exp:ExpressionWithConnector* expRest:ObjectExpressionRest* "}" {
-   expRest.forEach(item=>{
-     exp = exp.concat(item)
-   });
-   const lastIndex = exp.length -1;
-   exp[0].exp.left = '{' + exp[0].exp.left;
-   const lastRight = exp[lastIndex].exp.right;
-   exp[lastIndex].exp.right =   (lastRight==null?'':lastRight) + '}';
-   //console.log("exp",exp);
-   return exp;
+Expression = exp1:SingleExpression expn:MultipleExpression* {
+   return [exp1].concat(expn);
 }
 
-ObjectExpressionRest = "," exp:ExpressionWithConnector* {
-  exp[0].exp.left= "," + exp[0].exp.left;
-  return exp;
+ExpressionRightSide = op:Operator right:AnyValue {
+ return {op,right}
 }
 
-ExpressionWithConnector = exp:SingleExpression op:Connector? {
- return {exp,op}
-}
-
-SingleExpression = _* left:ExpWord _* op:Operator? _* right:ExpWord? _* {
-  return {
-   left,op,right
+SingleExpression = left:AnyValue right_op:ExpressionRightSide?  {
+  return (ctx)=>{
+     if(right_op){
+       const op = right_op.op;
+       const right = right_op.right;
+      return left + op + typeof right=="function"? right(ctx):right;   
+     }
+     return left; 
   }
 }
 
-Connector = val:[&\|\:]+ {
+MultipleExpression = _* op:Connector _* exp:SingleExpression {
+  return (ctx)=>{
+    return op + exp(ctx)
+  }
+} 
+
+Connector = val:[&\|]+ {
   return val.join("");
 }
 
@@ -221,6 +217,53 @@ Html "html"= val: [^<>{}]+ {
 
 StringSymbol "' or \" " = ['/"]
 
+AnyValue = PrimitiveValue/ObjectValue
+
+ObjectValue = "{" exp:ObjectKeyVal expRest:ObjectValueRest* "}" {
+   expRest.forEach(item=>{
+      Object.assign(exp,item)
+   });
+   return exp;
+}
+
+ObjectValueRest = _* "," exp:ObjectKeyVal {
+  return exp;
+}
+
+ObjectKeyWithQuote = StringSymbol val:Identifier StringSymbol {
+  return val;
+}
+
+ObjectKeyVal = _* key: (ObjectKeyWithQuote/Identifier) _* ":" val:(Expression/PrimitiveValue) {
+  return {[key]:val};
+}
+
+PrimitiveValue = Number/String/Prop ;
+
 Word "word" = val:[a-zA-Z0-9\&\ \|\.\$\!\=\-\:\;\#]+ {
 	return val.join("");
+}
+
+Number "number" = val:[0-9]+ {
+   return Number(val.join(""));
+}
+
+String "string" = StringSymbol val:Word StringSymbol {
+   return val;
+}
+
+Prop "prop" = val:Identifier {
+  return (ctx)=>{`${ctx}.val`}
+}
+
+IdentifierAlphabet = val:[a-zA-Z\$\_\-\.]+ {
+ return val.join("");
+}
+
+IdentifierPartial = val1:IdentifierAlphabet val2:Number? {
+    return val2!=null ? val1+val2 : val1;
+}
+
+Identifier "identifier" = val:IdentifierPartial + {
+    return val.join("");
 }
