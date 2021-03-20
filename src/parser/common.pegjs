@@ -15,7 +15,7 @@ HtmlTagSelfClosing = openTag:HtmlOpen "/" GtSymbol {
   }
 }
 
-HtmlOpen = LtSymbol word: Identifier _* option:(HtmlOpenOption)* {
+HtmlOpen = LtSymbol word: XmlTag _* option:(HtmlOpenOption)* {
   const result = {
      tag:word,
      events:[],
@@ -50,8 +50,12 @@ HtmlOpenOption = value:((If/ElseIf/Else)/For/(Event)/Attribute/InnerHtml/Directi
   }
 }
 
-CloseTag "close tag"= StartCloseTag word: Identifier GtSymbol{
+CloseTag "close tag"= StartCloseTag word: XmlTag GtSymbol{
   return word
+}
+
+XmlTag "html tag" = val:[a-zA-Z0-9-]+ {
+  return val.join("");
 }
 
 
@@ -215,7 +219,7 @@ Html "html"= val: [^<>{}]+ {
 	return val.join("").replace(/[\n\r]/gm, "").replace(/\s\s+/g, ' ');
 }
 
-StringSymbol "string" = ['/"]
+StringSymbol "' or \" " = ['/"]
 
 Word "word" = val:[a-zA-Z0-9\&\ \|\.\$\!\=\-\:\;\#]+ {
 	return val.join("");
