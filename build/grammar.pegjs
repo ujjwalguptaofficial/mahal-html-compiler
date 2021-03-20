@@ -92,7 +92,7 @@ For= "#for("_* key:Identifier _* index:ForIndex?  _* "in" _* value:Expression _*
    }}
 }
 
-Attribute= isBind:":"? attr:Identifier _* "=" StringSymbol word:Word StringSymbol _*{
+Attribute= isBind:":"? attr:Identifier _* "=" StringSymbol word:(Word/ObjectExpression) StringSymbol _*{
    return {attr: {key:attr,value:word, isBind:isBind!=null}};
 }
 
@@ -114,8 +114,12 @@ Identifier "identifier"= val:[a-zA-Z0-9\$\_\-]+ {
 	return val.join("");
 }
 
-MustacheExpression "mustache expression" = "{{" val:Html filters:Filter* _*  "}}"+ {
+MustacheExpression "mustache expression" = "{{" val:MustacheContent filters:Filter* _*  "}}"+ {
 	return {mustacheExp:val , filters};
+}
+
+MustacheContent "mustache content"= val:[^|}{]+ {
+	return val.join("").replace(/[\n\r]/gm, "").replace(/\s\s+/g, ' ');
 }
 
 Filter "filter" = _* "|" _* val:Identifier {
@@ -206,12 +210,12 @@ EventAssignment "Event Assignment"= val:[a-zA-Z0-9\&\=\>\{\}\(\)\ \|\[\]]+ {
 	return val.join("");
 }
 
-Html "html"= val:[a-zA-Z0-9\&\ \.\$\n\r\"\'\@]+ {
+Html "html"= val:[a-zA-Z0-9\&\ \.\$\n\r\"\'\@\|]+ {
 	return val.join("").replace(/[\n\r]/gm, "").replace(/\s\s+/g, ' ');
 }
 
 StringSymbol "string" = ['/"]
 
-Word "word" = val:[a-zA-Z0-9\&\ \|\.\$\!\=\-\:\;]+ {
+Word "word" = val:[a-zA-Z0-9\&\ \|\.\$\!\=\-\:\;\#]+ {
 	return val.join("");
 }
