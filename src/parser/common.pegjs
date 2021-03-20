@@ -1,6 +1,6 @@
 HtmlTag = HtmlTagClosing/HtmlTagSelfClosing
 
-HtmlTagClosing = openTag:HtmlOpen EndTag child:(HtmlTag/Html/MustacheExpression)* CloseTag {
+HtmlTagClosing = openTag:HtmlOpen GtSymbol child:(HtmlTag/Html/MustacheExpression)* CloseTag {
   return {
    view:openTag,
    child: child.filter(item=> {
@@ -9,13 +9,13 @@ HtmlTagClosing = openTag:HtmlOpen EndTag child:(HtmlTag/Html/MustacheExpression)
   }
 }
 
-HtmlTagSelfClosing = openTag:HtmlOpen "/" EndTag {
+HtmlTagSelfClosing = openTag:HtmlOpen "/" GtSymbol {
   return {
     view:openTag
   }
 }
 
-HtmlOpen = StartOpenTag word: Identifier _* option:(HtmlOpenOption)* {
+HtmlOpen = LtSymbol word: Identifier _* option:(HtmlOpenOption)* {
   const result = {
      tag:word,
      events:[],
@@ -50,7 +50,7 @@ HtmlOpenOption = value:((If/ElseIf/Else)/For/(Event)/Attribute/InnerHtml/Directi
   }
 }
 
-CloseTag "close tag"= StartCloseTag word: Identifier EndTag{
+CloseTag "close tag"= StartCloseTag word: Identifier GtSymbol{
   return word
 }
 
@@ -104,10 +104,11 @@ InnerHtml= "#html" _* "=" StringSymbol? val:Identifier StringSymbol? {
    return {html: val};
 }
 
-StartOpenTag "<" = [<];
-StartCloseTag "</" = [<][/]; 
+LtSymbol "<" = [<];
 
-EndTag ">" = [>];
+StartCloseTag "</" = LtSymbol [/]; 
+
+GtSymbol ">" = [>];
 
 
 Identifier "identifier"= val:[a-zA-Z0-9\$\_\-]+ {
@@ -210,7 +211,7 @@ EventAssignment "Event Assignment"= val:[a-zA-Z0-9\&\=\>\{\}\(\)\ \|\[\]]+ {
 	return val.join("");
 }
 
-Html "html"= val:[a-zA-Z0-9\&\ \.\$\n\r\"\'\@\|]+ {
+Html "html"= val: [^<>{}]+ {
 	return val.join("").replace(/[\n\r]/gm, "").replace(/\s\s+/g, ' ');
 }
 
