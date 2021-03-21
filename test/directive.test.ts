@@ -17,4 +17,16 @@ describe('Directive', function () {
         `)
     })
 
+    it('example 2', () => {
+        createRenderer(`
+        <div>
+        <div class="row">
+            <div #addClass({ 'active' : value===tab }) on:click="()=>{onTabClick(tab)}" class="tab margin-right-10px" #for(tab in tabs) >
+                {{tab}}
+            </div>
+        </div>  
+</div>
+        `)
+    })
+
 })

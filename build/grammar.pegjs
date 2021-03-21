@@ -74,9 +74,6 @@ Directive "directive" = "#" name:Word value:DirectiveValue? {
 }
 
 DirectiveValue = "(" expFirst:DirectiveParam _* expRest:DirectiveRestValue * ")" {
-   //return expFirst;
-   console.log("expRest", expRest, expFirst)
-   //expRest.unshift(expFirst);
    return [expFirst].concat(expRest.map(item=> item))
 }
 
@@ -211,7 +208,6 @@ SingleExpression = left:ExpressionValue right_op:ExpressionRightSide?  {
        expStr+= op;
        raw+=op;
        const right = right_op.val;
-       console.log("right", right);
        expStr+= right.expStr;
        raw+= right.raw;
        keys = [...keys,...right.keys]
@@ -249,7 +245,7 @@ StringSymbol "' or \" " = ['/"]
 
 AnyValue = PrimitiveValue/ObjectValue
 
-ObjectValue = "{" exp:ObjectOneKeyVal expRest:ObjectValueRest* "}" {
+ObjectValue = "{" exp:ObjectOneKeyVal _* expRest:ObjectValueRest* "}" {
    let keys = exp.keys;
    let raw = exp.raw;
    let expStr=exp.expStr;
@@ -272,7 +268,7 @@ ObjectKeyWithQuote = StringSymbol val:Identifier StringSymbol {
   return `'${val}'`;
 }
 
-ObjectOneKeyVal = _* key: (ObjectKeyWithQuote/Identifier) _* ":" val:(Expression/PrimitiveValue) {
+ObjectOneKeyVal = _* key: (ObjectKeyWithQuote/Identifier) _* ":" _* val:(Expression/PrimitiveValue) {
   //key = `'${key}'`;
   val.expStr=`${key}:${val.expStr}`;
   val.raw=`${key}:${val.raw}`
