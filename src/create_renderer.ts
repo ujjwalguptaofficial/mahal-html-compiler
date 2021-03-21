@@ -4,7 +4,6 @@ import { ERROR_TYPE } from "./enums";
 import { contextString } from "./constant";
 import { ICompiledView, IIfExpModified } from "./interface";
 import { unique } from "./unique";
-import { addCtxToExpression } from "./add_ctx_to_expression";
 import { removeCommaFromLast } from "./remove_comma_from_last";
 import { convertArrayToString } from "./convert_array_to_comma_seperated_string";
 import beautify from 'js-beautify';
@@ -158,10 +157,10 @@ export function createRenderer(template: string) {
                             params: []
                         }
                         compiled.view.dir[dirName].forEach(dirValue => {
-                            const expressionEvaluation = addCtxToExpression(dirValue);
-                            dirBinding.value.push(expressionEvaluation.expStr)
-                            dirBinding.props = [...dirBinding.props, ...expressionEvaluation.keys]
-                            dirBinding.params.push(expressionEvaluation.raw)
+                            // const expressionEvaluation = addCtxToExpression(dirValue);
+                            dirBinding.value.push(dirValue.expStr)
+                            dirBinding.props = [...dirBinding.props, ...dirValue.keys]
+                            dirBinding.params.push(dirValue.raw)
                         })
 
                         optionStr += `${dirName}:{ 
@@ -206,7 +205,7 @@ export function createRenderer(template: string) {
 
             const handleFor = (value: string) => {
                 let forExp = compiled.view.forExp;
-                const { keys } = addCtxToExpression(forExp.value);
+                const { keys } = forExp.value;
                 const getRegex = (subStr) => {
                     return new RegExp(subStr, 'g');
                 }
@@ -223,12 +222,12 @@ export function createRenderer(template: string) {
             if (ifModified && ifModified.ifExp) {
                 let allKeys = [];
                 (() => {
-                    const { expStr, keys } = addCtxToExpression(ifModified.ifExp);
+                    const { expStr, keys } = ifModified.ifExp;
                     allKeys = allKeys.concat(keys);
                     str += `he(()=>{return ${expStr} ? ${handleTag() + handleOption()}`
                 })();
                 ifModified.ifElseList.forEach(item => {
-                    const { expStr, keys } = addCtxToExpression(item.view.ifExp.elseIfCond);
+                    const { expStr, keys } = item.view.ifExp.elseIfCond;
                     allKeys = allKeys.concat(keys);
                     str += `:${expStr} ? ${createJsEqFromCompiled(item)} `
                 });
@@ -260,14 +259,7 @@ export function createRenderer(template: string) {
                 method += `f('${item}',`
                 brackets += ")"
             });
-            const { keys, expStr } = addCtxToExpression([{
-                op: null,
-                exp: {
-                    left: compiled.mustacheExp,
-                    op: null,
-                    right: null
-                }
-            }]);
+            const { keys, expStr } = compiled.mustacheExp;
             method += `${expStr} ${brackets} )}`;
             str += `he(${method}, ${convertArrayToString(keys)},${unique()})`
         }

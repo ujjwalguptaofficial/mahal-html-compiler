@@ -1,6 +1,6 @@
 import { IExpression } from "../add_ctx_to_expression";
 export interface IIfExpModified {
-    ifExp: IExpression[];
+    ifExp: IExpression;
     ifElseList: ICompiledView[];
     else: ICompiledView;
 }
@@ -9,13 +9,13 @@ export interface ICompiledView {
         tag: string,
         ifExpModified: IIfExpModified,
         ifExp: {
-            ifCond: IExpression[];
-            elseIfCond: IExpression[];
+            ifCond: IExpression;
+            elseIfCond: IExpression;
             else: boolean;
         },
         forExp: {
             key: string;
-            value: IExpression[];
+            value: IExpression;
             index: string;
         },
         attr: {
@@ -33,10 +33,10 @@ export interface ICompiledView {
             modifiers: string[]
         }[],
         dir: {
-            [name: string]: IExpression[][]
+            [name: string]: IExpression[]
         }
     },
-    mustacheExp: string,
+    mustacheExp: IExpression,
     child: ICompiledView[]
     filters: string[];
 }

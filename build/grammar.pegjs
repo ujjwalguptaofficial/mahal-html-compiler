@@ -1,3 +1,6 @@
+{
+ const CTX = "ctx";
+}
 HtmlTag = HtmlTagClosing/HtmlTagSelfClosing
 
 HtmlTagClosing = openTag:HtmlOpen GtSymbol child:(HtmlTag/Html/MustacheExpression)* CloseTag {
@@ -70,17 +73,19 @@ Directive "directive" = "#" name:Word value:DirectiveValue? {
    }};
 }
 
-DirectiveValue = "(" expFirst:DirectiveParam _* expRest:DirectiveRestValue* ")" {
-   expRest.unshift(expFirst);
-   return expRest
+DirectiveValue = "(" expFirst:DirectiveParam _* expRest:DirectiveRestValue * ")" {
+   //return expFirst;
+   console.log("expRest", expRest, expFirst)
+   //expRest.unshift(expFirst);
+   return [expFirst].concat(expRest.map(item=> item))
 }
 
 
-DirectiveRestValue =  "," _* exp:DirectiveParam _* {
+DirectiveRestValue =  "," _* exp:DirectiveParam _*  {
   return exp;
 }
 
-DirectiveParam = Expression/AnyValue
+DirectiveParam = Expression
 
 If= "#if(" exp:Expression ")"{
    return {ifExp: {ifCond:exp}};
@@ -119,7 +124,7 @@ GtSymbol ">" = [>];
 
 
 
-MustacheExpression "mustache expression" = "{{" val:MustacheContent filters:Filter* _*  "}}"+ {
+MustacheExpression "mustache expression" = "{{" val:Expression filters:Filter* _*  "}}"+ {
 	return {mustacheExp:val , filters};
 }
 
@@ -171,31 +176,56 @@ EventModifier "event modifier" = "."  value:Identifier {
 }
 
 Expression = exp1:SingleExpression expn:MultipleExpression* {
-   return [exp1].concat(expn);
+   expn.forEach(exp=>{
+     exp1.raw += exp.raw? exp.raw : "";
+     exp1.expStr += exp.expStr;
+     exp1.keys=exp1.keys.concat(exp.keys)
+   });
+   return exp1;
 }
 
-ExpressionRightSide = op:Operator right:AnyValue {
- return {op,right}
+ExpressionRightSide = op:Operator val:AnyValue {
+ return {op,val}
 }
 
 SingleExpression = left:AnyValue right_op:ExpressionRightSide?  {
-  return (ctx)=>{
+  
+     const result = {expStr:"",keys:[],raw:""};
+     let expStr; let keys = []; let raw;
+     if(left.__isProp__){
+        expStr=`${CTX}.${left.value}`;
+        keys.push(left.value);
+        raw = left.value;
+     }
+     else{
+        expStr=raw=left;
+     }
      if(right_op){
        const op = right_op.op;
-       const right = right_op.right;
-      return left + op + typeof right=="function"? right(ctx):right;   
+       
+       expStr+= op;
+       raw+=op;
+       const right = right_op.val;
+       if(right.__isProp__){
+          expStr+=`${CTX}.${right.value}`;
+          keys.push(right.value);
+          raw+= right.value;
+       }
+       else{
+          expStr+= right;
+          raw+= right;
+       } 
      }
-     return left; 
-  }
+     return  {expStr,keys,raw};
 }
 
 MultipleExpression = _* op:Connector _* exp:SingleExpression {
-  return (ctx)=>{
-    return op + exp(ctx)
-  }
+  exp.raw=` ${op} ${exp.raw}`;
+  exp.expStr=` ${op} ${exp.expStr}`
+  return exp;
 } 
 
-Connector = val:[&\|]+ {
+Connector = val:([&]/"||")+ {
   return val.join("");
 }
 
@@ -248,12 +278,15 @@ Number "number" = val:[0-9]+ {
    return Number(val.join(""));
 }
 
-String "string" = StringSymbol val:Word StringSymbol {
-   return val;
+String "string" = StringSymbol val:[a-zA-Z0-9\&\ \.\$\!\=\-\:\;\#]+ StringSymbol {
+   return val.join("");
 }
 
 Prop "prop" = val:Identifier {
-  return (ctx)=>{`${ctx}.val`}
+  return {
+    __isProp__:true,
+    value:val
+  }
 }
 
 IdentifierAlphabet = val:[a-zA-Z\$\_\-\.]+ {
