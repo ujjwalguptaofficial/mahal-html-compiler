@@ -269,21 +269,25 @@ ObjectValueRest = _* "," exp:ObjectOneKeyVal {
 }
 
 ObjectKeyWithQuote = StringSymbol val:Identifier StringSymbol {
-  return val;
+  return `'${val}'`;
 }
 
 ObjectOneKeyVal = _* key: (ObjectKeyWithQuote/Identifier) _* ":" val:(Expression/PrimitiveValue) {
-  key = `'${key}'`;
+  //key = `'${key}'`;
   val.expStr=`${key}:${val.expStr}`;
   val.raw=`${key}:${val.raw}`
   return val;
   //return {[key]:val};
 }
 
-PrimitiveValue = Number/String/Prop ;
+PrimitiveValue = Number/String/Boolean/Prop ;
 
 Word "word" = val:[a-zA-Z0-9\&\ \|\.\$\!\=\-\:\;\#]+ {
 	return val.join("");
+}
+
+Boolean "boolean" = val:("true" / "false") {
+  return val=="true"?true:false;
 }
 
 Number "number" = val:[0-9]+ {
@@ -291,7 +295,7 @@ Number "number" = val:[0-9]+ {
 }
 
 String "string" = StringSymbol val:[a-zA-Z0-9\&\ \.\$\!\=\-\:\;\#]+ StringSymbol {
-   return val.join("");
+   return `'${val.join("")}'`;
 }
 
 Prop "prop" = val:Identifier {
