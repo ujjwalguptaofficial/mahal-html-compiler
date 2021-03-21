@@ -181,40 +181,40 @@ Expression = exp1:SingleExpression expn:MultipleExpression* {
      exp1.expStr += exp.expStr;
      exp1.keys=exp1.keys.concat(exp.keys)
    });
+   exp1.keys = Array.from(new Set(exp1.keys));
    return exp1;
 }
 
-ExpressionRightSide = op:Operator val:AnyValue {
+ExpressionValue = val : AnyValue {
+  if(val.expStr){
+    return val;
+  }
+  if(val.__isProp__){
+    return {keys:[val.value], raw: val.value, expStr: "ctx." + val.value}
+  }
+  return {keys:[],raw:val,expStr:val}
+}
+
+ExpressionRightSide = op:Operator val:ExpressionValue {
  return {op,val}
 }
 
-SingleExpression = left:AnyValue right_op:ExpressionRightSide?  {
+SingleExpression = left:ExpressionValue right_op:ExpressionRightSide?  {
   
      const result = {expStr:"",keys:[],raw:""};
-     let expStr; let keys = []; let raw;
-     if(left.__isProp__){
-        expStr=`${CTX}.${left.value}`;
-        keys.push(left.value);
-        raw = left.value;
-     }
-     else{
-        expStr=raw=left;
-     }
+     let keys = left.keys;
+     let expStr=left.expStr;
+     let raw = left.raw
+     
      if(right_op){
        const op = right_op.op;
-       
        expStr+= op;
        raw+=op;
        const right = right_op.val;
-       if(right.__isProp__){
-          expStr+=`${CTX}.${right.value}`;
-          keys.push(right.value);
-          raw+= right.value;
-       }
-       else{
-          expStr+= right;
-          raw+= right;
-       } 
+       console.log("right", right);
+       expStr+= right.expStr;
+       raw+= right.raw;
+       keys = [...keys,...right.keys]
      }
      return  {expStr,keys,raw};
 }
@@ -249,14 +249,22 @@ StringSymbol "' or \" " = ['/"]
 
 AnyValue = PrimitiveValue/ObjectValue
 
-ObjectValue = "{" exp:ObjectKeyVal expRest:ObjectValueRest* "}" {
+ObjectValue = "{" exp:ObjectOneKeyVal expRest:ObjectValueRest* "}" {
+   let keys = exp.keys;
+   let raw = exp.raw;
+   let expStr=exp.expStr;
+   
    expRest.forEach(item=>{
-      Object.assign(exp,item)
+      //Object.assign(exp,item)
+      expStr+= ","+item.expStr;
+      raw+= ","+item.raw;
+      keys=[...keys,...item.keys]
    });
+   return {keys,raw:`{${raw}}`,expStr:`{${expStr}}`};
    return exp;
 }
 
-ObjectValueRest = _* "," exp:ObjectKeyVal {
+ObjectValueRest = _* "," exp:ObjectOneKeyVal {
   return exp;
 }
 
@@ -264,8 +272,12 @@ ObjectKeyWithQuote = StringSymbol val:Identifier StringSymbol {
   return val;
 }
 
-ObjectKeyVal = _* key: (ObjectKeyWithQuote/Identifier) _* ":" val:(Expression/PrimitiveValue) {
-  return {[key]:val};
+ObjectOneKeyVal = _* key: (ObjectKeyWithQuote/Identifier) _* ":" val:(Expression/PrimitiveValue) {
+  key = `'${key}'`;
+  val.expStr=`${key}:${val.expStr}`;
+  val.raw=`${key}:${val.raw}`
+  return val;
+  //return {[key]:val};
 }
 
 PrimitiveValue = Number/String/Prop ;

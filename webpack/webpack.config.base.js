@@ -6,7 +6,7 @@ const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     entry: path.resolve(__dirname, '../src/index.ts'),
-    devtool: 'source-map',
+    // devtool: 'source-map',
     // target: "node",
     mode: "development",
     module: {
@@ -27,5 +27,5 @@ module.exports = {
             ],
         }),
     ],
-    externals: [nodeExternals()]
+    // externals: [nodeExternals()]
 };
