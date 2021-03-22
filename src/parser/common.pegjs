@@ -101,9 +101,17 @@ For= "#for("_* key:Identifier _* index:ForIndex?  _* "in" _* value:Expression _*
    }}
 }
 
-Attribute= isBind:":"? attr:Identifier _* "=" StringSymbol word:Word StringSymbol _*{
-   return {attr: {key:attr,value:word, isBind:isBind!=null}};
+SimpleAttribute = attr:Identifier _* "=" StringSymbol word: Word StringSymbol _*{
+   return {attr: {key:attr,value:word, isBind:false}};
 }
+
+ExpressionAttribute = isExpression:":" attr:Identifier _* "=" StringSymbol word:Expression StringSymbol _*{
+   return { 
+      attr: {key:attr,value:word, isExpression:true}
+   };
+}
+
+Attribute= SimpleAttribute/ExpressionAttribute ;
 
 ForIndex = "," _* index:Identifier{
 	return index ;
@@ -251,7 +259,6 @@ ObjectValue = "{" exp:ObjectOneKeyVal _* expRest:ObjectValueRest* "}" {
    let expStr=exp.expStr;
    
    expRest.forEach(item=>{
-      //Object.assign(exp,item)
       expStr+= ","+item.expStr;
       raw+= ","+item.raw;
       keys=[...keys,...item.keys]

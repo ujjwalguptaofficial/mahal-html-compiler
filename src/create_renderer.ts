@@ -7,6 +7,7 @@ import { unique } from "./unique";
 import { removeCommaFromLast } from "./remove_comma_from_last";
 import { convertArrayToString } from "./convert_array_to_comma_seperated_string";
 import beautify from 'js-beautify';
+import { IExpression } from "./add_ctx_to_expression";
 
 export function createRenderer(template: string) {
     template = template.trim();
@@ -187,8 +188,9 @@ export function createRenderer(template: string) {
                 if (attrLength > 0) {
                     let attrString = '';
                     attr.forEach((item, index) => {
-                        if (item.isBind) {
-                            attrString += `${item.key}:{v:ctx.${item.value},k:'${item.value}'}`;
+                        if (item.isExpression) {
+                            const val: IExpression = item.value as IExpression;
+                            attrString += `${item.key}:{v: ${val.expStr},k:'${val.keys[0]}'}`;
                         }
                         else {
                             attrString += `${item.key}:{v:'${item.value}'}`;

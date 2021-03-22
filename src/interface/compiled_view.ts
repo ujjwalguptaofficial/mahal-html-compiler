@@ -20,8 +20,8 @@ export interface ICompiledView {
         },
         attr: {
             key: string,
-            value: string,
-            isBind: Boolean
+            value: string | IExpression,
+            isExpression: Boolean
         }[],
         model: string,
         html: string,
