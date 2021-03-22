@@ -75,6 +75,7 @@ export function createRenderer(template: string) {
                         }
                         const ifExp = child.view.ifExp;
                         if (ifExp.ifCond) {
+                            isIfCondEndFound = false;
                             ifModifiedExpression = {
                                 ifExp: ifExp.ifCond,
                                 ifElseList: []
