@@ -7,3 +7,4 @@ node_modules
 
 #definition
 !dist/ts/src
+*.tgz
