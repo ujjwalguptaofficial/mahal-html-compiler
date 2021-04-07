@@ -92,4 +92,10 @@ describe('simple', function () {
      </div>`);
     })
 
+    it('tag with "_"', () => {
+        createRenderer(`<div>
+        <in_place of="name" />
+     </div>`);
+    })
+
 })

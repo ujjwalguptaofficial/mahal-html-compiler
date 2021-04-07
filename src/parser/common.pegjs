@@ -57,7 +57,7 @@ CloseTag "close tag"= StartCloseTag word: XmlTag GtSymbol{
   return word
 }
 
-XmlTag "html tag" = val:[a-zA-Z0-9-]+ {
+XmlTag "html tag" = val:[a-zA-Z0-9-_]+ {
   return val.join("");
 }
 
