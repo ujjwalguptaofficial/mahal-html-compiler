@@ -167,7 +167,8 @@ export function createRenderer(template: string) {
 
                         optionStr += `${dirName}:{ 
                                 value:()=>{ 
-                                    return ${dirBinding.value.length > 1 ? convertArrayToString(dirBinding.value, false) : dirBinding.value} 
+                                    // return ${dirBinding.value.length > 1 ? convertArrayToString(dirBinding.value, false) : dirBinding.value} 
+                                    return ${convertArrayToString(dirBinding.value, false)} 
                                 },
                                 props:${convertArrayToString(dirBinding.props)},
                                 params: ${convertArrayToString(dirBinding.value, false)}
@@ -215,8 +216,7 @@ export function createRenderer(template: string) {
                     return new RegExp(subStr, 'g');
                 }
                 return `...he((${forExp.key},${forExp.index})=>{
-                            return ${
-                    value.replace(getRegex(`ctx.${forExp.key}`), forExp.key).
+                            return ${value.replace(getRegex(`ctx.${forExp.key}`), forExp.key).
                         replace(getRegex(`ctx.${forExp.index}`), forExp.index)
                     }
                         },${convertArrayToString(keys)},'for')

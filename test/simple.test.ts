@@ -7,6 +7,10 @@ describe('simple', function () {
         createRenderer(`<div>{{ujjwal}}</div>`)
     })
 
+    it('div with mustache expression', () => {
+        createRenderer(`<div>{{ujjwal + "as" + 1}}</div>`)
+    })
+
     it('div with simple inner text', () => {
         createRenderer(`<div>ujjwal</div>`)
     })
@@ -98,4 +102,5 @@ describe('simple', function () {
      </div>`);
     })
 
+    
 })

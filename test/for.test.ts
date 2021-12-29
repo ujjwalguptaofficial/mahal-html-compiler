@@ -11,6 +11,16 @@ describe('For loop', function () {
         `)
     })
 
+    it('with +index', () => {
+        createRenderer(`
+        <div>
+            <div class="todo" #for(item,index in todos)>
+            {{index+1}} {{item}}
+        </div>
+        </div>
+        `)
+    })
+
     it('for on root element', (done) => {
         new Promise(_ => {
             createRenderer(`
