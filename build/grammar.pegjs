@@ -18,9 +18,9 @@ HtmlTagSelfClosing = openTag:HtmlOpen "/" GtSymbol {
   }
 }
 
-HtmlOpen = LtSymbol word: XmlTag _* option:(HtmlOpenOption)* {
+HtmlOpen = LtSymbol word: XmlTag? _* option:(HtmlOpenOption)* {
   const result = {
-     tag:word,
+     tag:word || 'fragment',
      events:[],
      attr:[],
      dir:{}
@@ -53,8 +53,8 @@ HtmlOpenOption = value:((If/ElseIf/Else)/For/(Event)/Attribute/InnerHtml/Directi
   }
 }
 
-CloseTag "close tag"= StartCloseTag word: XmlTag GtSymbol{
-  return word
+CloseTag "close tag"= StartCloseTag word: XmlTag? GtSymbol{
+  return word || 'fragment'
 }
 
 XmlTag "html tag" = val:[a-zA-Z0-9-_]+ {

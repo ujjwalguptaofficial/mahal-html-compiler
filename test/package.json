@@ -1,0 +1,14 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "debug.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install:lib": "node install.js",
+    "debug": "node debug.js",
+    "install:debug":"npm run install:lib && npm run debug"
+  },
+  "author": "",
+  "license": "ISC"
+}

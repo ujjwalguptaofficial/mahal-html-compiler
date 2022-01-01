@@ -29,4 +29,11 @@ describe('Directive', function () {
         `)
     })
 
+    it('example 3', () => {
+        createRenderer(`
+        <div #show(flag===true)>
+        </div>
+        `)
+    })
+
 })

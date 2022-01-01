@@ -5,7 +5,7 @@ import { contextString } from "./constant";
 import { ICompiledView, IIfExpModified } from "./interface";
 import { unique } from "./unique";
 import { removeCommaFromLast } from "./remove_comma_from_last";
-import { convertArrayToString } from "./convert_array_to_comma_seperated_string";
+import { convertArrayToString, createSetterForArray } from "./convert_array_to_comma_seperated_string";
 import beautify from 'js-beautify';
 import { IExpression } from "./add_ctx_to_expression";
 
@@ -166,9 +166,11 @@ export function createRenderer(template: string) {
                         })
 
                         optionStr += `${dirName}:{ 
-                                value:()=>{ 
-                                    // return ${dirBinding.value.length > 1 ? convertArrayToString(dirBinding.value, false) : dirBinding.value} 
+                                get value(){ 
                                     return ${convertArrayToString(dirBinding.value, false)} 
+                                },
+                                set value(values){
+                                    ${createSetterForArray(dirBinding.value, 'values')}
                                 },
                                 props:${convertArrayToString(dirBinding.props)},
                                 params: ${convertArrayToString(dirBinding.value, false)}

@@ -158,7 +158,7 @@ function peg$parse(input, options) {
       },
       peg$c4 = function(word, option) {
         const result = {
-           tag:word,
+           tag:word || 'fragment',
            events:[],
            attr:[],
            dir:{}
@@ -191,7 +191,7 @@ function peg$parse(input, options) {
       },
       peg$c6 = peg$otherExpectation("close tag"),
       peg$c7 = function(word) {
-        return word
+        return word || 'fragment'
       },
       peg$c8 = peg$otherExpectation("html tag"),
       peg$c9 = /^[a-zA-Z0-9\-_]/,
@@ -713,6 +713,9 @@ function peg$parse(input, options) {
     s1 = peg$parseLtSymbol();
     if (s1 !== peg$FAILED) {
       s2 = peg$parseXmlTag();
+      if (s2 === peg$FAILED) {
+        s2 = null;
+      }
       if (s2 !== peg$FAILED) {
         s3 = [];
         s4 = peg$parse_();
@@ -808,6 +811,9 @@ function peg$parse(input, options) {
     s1 = peg$parseStartCloseTag();
     if (s1 !== peg$FAILED) {
       s2 = peg$parseXmlTag();
+      if (s2 === peg$FAILED) {
+        s2 = null;
+      }
       if (s2 !== peg$FAILED) {
         s3 = peg$parseGtSymbol();
         if (s3 !== peg$FAILED) {

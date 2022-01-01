@@ -1,5 +1,5 @@
 import { removeCommaFromLast } from "./remove_comma_from_last";
-import { stringRegex } from "./constant";
+import { comparisionOpRegex, stringRegex } from "./constant";
 
 export function convertArrayToString(value: string[], shouldAddSingleQuote = true) {
     let result = "[";
@@ -11,4 +11,14 @@ export function convertArrayToString(value: string[], shouldAddSingleQuote = tru
     result = removeCommaFromLast(result);
     result += "]"
     return result;
+}
+
+export function createSetterForArray(value: string[], valueKey: string) {
+    let string = "";
+    value.forEach((val, index) => {
+        if (stringRegex.test(val) === false && comparisionOpRegex.test(val) === false) {
+            string += `${val} = ${valueKey}[${index}];`
+        }
+    });
+    return string;
 }
