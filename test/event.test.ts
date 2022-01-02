@@ -57,4 +57,10 @@ describe('Event', function () {
         </div>
         `)
     })
+
+    it('example 3', () => {
+        createRenderer(`
+        <button on:click="{update(editStudent)}">Update</button>
+        `)
+    })
 })

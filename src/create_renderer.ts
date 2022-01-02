@@ -280,5 +280,10 @@ export function createRenderer(template: string) {
         parentStr = beautify(parentStr, { indent_size: 4, space_in_empty_paren: true })
     }
     // console.log("parentstr", parentStr);
-    return new Function('renderer', parentStr);
+    try {
+        return new Function('renderer', parentStr);
+    } catch (error) {
+        const fnString = "var str= `" + parentStr.toString() + "` ; new Function(str)";
+        return new Function(fnString);
+    }
 }
