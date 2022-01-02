@@ -398,8 +398,8 @@ function peg$parse(input, options) {
       	return val.join("");
       },
       peg$c107 = peg$otherExpectation("Event Assignment"),
-      peg$c108 = /^[a-zA-Z0-9&=>{}() |[\]]/,
-      peg$c109 = peg$classExpectation([["a", "z"], ["A", "Z"], ["0", "9"], "&", "=", ">", "{", "}", "(", ")", " ", "|", "[", "]"], false, false),
+      peg$c108 = /^[a-zA-Z0-9&=>{}() |[\],]/,
+      peg$c109 = peg$classExpectation([["a", "z"], ["A", "Z"], ["0", "9"], "&", "=", ">", "{", "}", "(", ")", " ", "|", "[", "]", ","], false, false),
       peg$c110 = peg$otherExpectation("html"),
       peg$c111 = /^[^<>{}]/,
       peg$c112 = peg$classExpectation(["<", ">", "{", "}"], true, false),
