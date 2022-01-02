@@ -129,7 +129,7 @@ GtSymbol ">" = [>];
 
 
 
-MustacheExpression "mustache expression" = "{{" val:Expression filters:Filter* _*  "}}"+ {
+MustacheExpression "mustache expression" = "{{"_* val:Expression filters:Filter* _*  "}}"+ {
 	return {mustacheExp:val , filters};
 }
 
@@ -241,7 +241,7 @@ ExpWord "expression" = val:[a-zA-Z0-9\.\$\-\'\"]+ {
 	return val.join("");
 }
 
-EventAssignment "Event Assignment"= val:[a-zA-Z0-9\&\=\>\{\}\(\)\ \|\[\]\,]+ {
+EventAssignment "Event Assignment"= val:[a-zA-Z0-9\&\=\>\{\}\(\)\ \|\[\]\,\.]+ {
 	return val.join("");
 }
 

@@ -51,7 +51,7 @@ describe('Event', function () {
         <div>
         <div #for(fruit,i in fruits)>
                 <input type="text" #model(fruit) />
-                <span>{{fruit}}</span>
+                <span on:click="()=>{updateFruit(fruit.name,i)}">{{fruit}}</span>
                 <button on:click="()=>{updateFruit(fruit,i)}">Update</button>
             </div>
         </div>
