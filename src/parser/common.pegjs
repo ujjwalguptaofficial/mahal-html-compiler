@@ -249,11 +249,11 @@ MultipleExpression = _* op:Connector _* exp:SingleExpression {
   return exp;
 } 
 
-Connector = val:([&]/"||")+ {
+Connector = val:([&]/"||"/"+"/"-"/"*")+ {
   return val.join("");
 }
 
-Operator = val:[>\=\<\!]+ {
+Operator = val:[>\=\<\!\+\-\*\/\\]+ {
   return val.join("");
 }
 
