@@ -3,10 +3,12 @@
 }
 HtmlTag = HtmlTagClosing/HtmlTagSelfClosing/HtmlComment
 
-HtmlComment = HtmlCommentStart word:CommentWord  "-->" {
+HtmlComment = HtmlCommentStart word:CommentContent  "-->" {
   return {
     view:{
-       tag:null
+       tag:null,
+       events:[],
+       attr:[]
     },
     child:[word]
   }
@@ -14,16 +16,9 @@ HtmlComment = HtmlCommentStart word:CommentWord  "-->" {
 
 HtmlCommentStart "<!--" = "<!--"
 
-Dash = val: ([->]) {
-  return val.join('')
-}
 
-//DoubleDashNotFollowedBy
-
-
-
-CommentWord "comment content" = word: ([a-zA-Z0-9\&\ \|\.\$\!\=\:\;\#])+  {
-  return word.join('')
+CommentContent "comment content" = word: (!"-->" c:. {return c})* {
+ return word.join('')
 }
 
 
