@@ -29,7 +29,7 @@ describe('Event', function () {
     it('event chaining', () => {
         createRenderer(`
         <div>
-        <input #model(email) type="text" />
+        <input :model(email) type="text" />
         <button id="btnSubmit" on:click={"validate" | "submit"}>Submit</button>
         </div>
         `)
@@ -49,8 +49,8 @@ describe('Event', function () {
     it('example 2', () => {
         createRenderer(`
         <div>
-        <div #for(fruit,i in fruits)>
-                <input type="text" #model(fruit) />
+        <div :for(fruit,i in fruits)>
+                <input type="text" :model(fruit) />
                 <span on:click="()=>{updateFruit(fruit.name,i)}">{{fruit}}</span>
                 <button on:click="()=>{updateFruit(fruit,i)}">Update</button>
             </div>

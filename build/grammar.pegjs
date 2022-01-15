@@ -1,7 +1,32 @@
 {
  const CTX = "ctx";
 }
-HtmlTag = HtmlTagClosing/HtmlTagSelfClosing
+HtmlTag = HtmlTagClosing/HtmlTagSelfClosing/HtmlComment
+
+HtmlComment = HtmlCommentStart word:CommentWord  "-->" {
+  return {
+    view:{
+       tag:null
+    },
+    child:[word]
+  }
+}
+
+HtmlCommentStart "<!--" = "<!--"
+
+Dash = val: ([->]) {
+  return val.join('')
+}
+
+//DoubleDashNotFollowedBy
+
+
+
+CommentWord "comment content" = word: ([a-zA-Z0-9\&\ \|\.\$\!\=\:\;\#])+  {
+  return word.join('')
+}
+
+
 
 HtmlTagClosing = openTag:HtmlOpen GtSymbol child:(HtmlTag/Html/MustacheExpression)* CloseTag {
   return {
@@ -66,7 +91,7 @@ Ws "Whitespace" = [ \t];
 
 _ "One or more whitespaces" = space:Ws+ {return null;}
 
-Directive "directive" = "#" name:Word value:DirectiveValue? {
+Directive "directive" = ":" name:Word value:DirectiveValue? {
    return {dir:{
       name,
       value: value || []
@@ -84,18 +109,18 @@ DirectiveRestValue =  "," _* exp:DirectiveParam _*  {
 
 DirectiveParam = Expression
 
-If= "#if(" exp:Expression ")"{
+If= ":if(" exp:Expression ")"{
    return {ifExp: {ifCond:exp}};
 }
 
-ElseIf= "#else-if(" exp:Expression ")"{
+ElseIf= ":else-if(" exp:Expression ")"{
    return {ifExp: {elseIfCond:exp}};
 }
-Else= "#else"{
+Else= ":else"{
    return {ifExp: {else:true}}
 }
 
-For= "#for("_* key:Identifier _* index:ForIndex?  _* "in" _* value:Expression _* ")"{
+For= ":for("_* key:Identifier _* index:ForIndex?  _* "in" _* value:Expression _* ")"{
    return {forExp:{
       key, value,index : index || 'i'
    }}
@@ -117,7 +142,7 @@ ForIndex = "," _* index:Identifier{
 	return index ;
 }
 
-InnerHtml= "#html" _* "=" StringSymbol? val:Identifier StringSymbol? {
+InnerHtml= ":html" _* "=" StringSymbol? val:Identifier StringSymbol? {
    return {html: val};
 }
 
@@ -141,7 +166,7 @@ Filter "filter" = _* "|" _* val:Identifier {
   return val;
 }
 
-Event "event syntax" = "on:" event:Identifier modifier:EventModifier* "=" handlers:EventHandlers {
+Event "event syntax" = ("on:"/"@") event:Identifier modifier:EventModifier* "=" handlers:EventHandlers {
 	 let isNative=false;
      const option = {};
      const modifierFiltered = [];

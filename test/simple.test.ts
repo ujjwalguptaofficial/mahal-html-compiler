@@ -23,7 +23,7 @@ describe('simple', function () {
         try {
             createRenderer(`<div>`);
         } catch (error) {
-            expect(error.message).to.be.equal(`Expected <, close tag, html, or mustache expression but end of input found.`)
+            expect(error.message).to.be.equal(`Expected <, <!--, close tag, html, or mustache expression but end of input found.`)
         }
         // new Promise(() => {
         //     createRenderer(`<div>`)
@@ -60,7 +60,7 @@ describe('simple', function () {
 
     it('model', () => {
         createRenderer(`<div>
-        <input type="text" #model(text) />
+        <input type="text" :model(text) />
      </div>`);
     })
 
