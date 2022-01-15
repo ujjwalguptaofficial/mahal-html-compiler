@@ -1,7 +1,11 @@
 const { createRenderer } = require("mahal-html-compiler");
 
-var fn = createRenderer(`
-            <button on:click="{update(editStudent)}">Update</button>
+try {
+    var fn = createRenderer(`
+            <button on:click="{update(editStudent)}">Update</butdton>
 `);
 
-console.log(fn.toString());
+    console.log(fn.toString());
+} catch (error) {
+    console.error(error);
+}

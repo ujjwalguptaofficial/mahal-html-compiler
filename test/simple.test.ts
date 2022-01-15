@@ -109,7 +109,9 @@ describe('simple', function () {
     it('html with different closing tag', () => {
         try {
             createRenderer(`<div>dd</divv>`);
+            throw new Error('there should be an error')
         } catch (error) {
+            console.error("error", error);
             expect(error.message).to.be.equal(`Expected </div> but </divv> found.`)
         }
         // new Promise(() => {

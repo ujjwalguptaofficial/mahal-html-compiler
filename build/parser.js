@@ -166,7 +166,7 @@ function peg$parse(input, options) {
        
        const openTagValue = openTag.tag;
        if (openTagValue != closeTag) {
-              throw new Error("Expected </" + openTagValue + "> but </" + closeTag + "> found.");
+              error("Expected </" + openTagValue + "> but </" + closeTag + "> found.");
         }
         return {
          view:openTag,
