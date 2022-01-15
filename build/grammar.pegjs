@@ -23,7 +23,12 @@ CommentContent "comment content" = word: (!"-->" c:. {return c})* {
 
 
 
-HtmlTagClosing = openTag:HtmlOpen GtSymbol child:(HtmlTag/Html/MustacheExpression)* CloseTag {
+HtmlTagClosing = openTag:HtmlOpen GtSymbol child:(HtmlTag/Html/MustacheExpression)* closeTag:CloseTag {
+ 
+ const openTagValue = openTag.tag;
+ if (openTagValue != closeTag) {
+        throw new Error("Expected </" + openTagValue + "> but </" + closeTag + "> found.");
+  }
   return {
    view:openTag,
    child: child.filter(item=> {

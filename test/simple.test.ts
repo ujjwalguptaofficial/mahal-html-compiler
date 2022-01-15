@@ -106,5 +106,16 @@ describe('simple', function () {
      </div>`);
     })
 
-    
+    it('html with different closing tag', () => {
+        try {
+            createRenderer(`<div>dd</divv>`);
+        } catch (error) {
+            expect(error.message).to.be.equal(`Expected </div> but </divv> found.`)
+        }
+        // new Promise(() => {
+        //     createRenderer(`<div>`)
+        // }).then(done).catch(() => {
+        //     done();
+        // });
+    })
 })

@@ -162,7 +162,12 @@ function peg$parse(input, options) {
       peg$c9 = function(word) {
        return word.join('')
       },
-      peg$c10 = function(openTag, child) {
+      peg$c10 = function(openTag, child, closeTag) {
+       
+       const openTagValue = openTag.tag;
+       if (openTagValue != closeTag) {
+              throw new Error("Expected </" + openTagValue + "> but </" + closeTag + "> found.");
+        }
         return {
          view:openTag,
          child: child.filter(item=> {
@@ -831,7 +836,7 @@ function peg$parse(input, options) {
           s4 = peg$parseCloseTag();
           if (s4 !== peg$FAILED) {
             peg$savedPos = s0;
-            s1 = peg$c10(s1, s3);
+            s1 = peg$c10(s1, s3, s4);
             s0 = s1;
           } else {
             peg$currPos = s0;
