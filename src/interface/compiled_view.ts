@@ -21,7 +21,8 @@ export interface ICompiledView {
         attr: {
             key: string,
             value: string | IExpression,
-            isExpression: Boolean
+            isExpression: Boolean,
+            filters: string[]
         }[],
         model: string,
         html: string,

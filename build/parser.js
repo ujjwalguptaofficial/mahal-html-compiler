@@ -280,9 +280,9 @@ function peg$parse(input, options) {
       peg$c55 = function(attr, word) {
          return {attr: {key:attr,value:word, isBind:false}};
       },
-      peg$c56 = function(isExpression, attr, word) {
+      peg$c56 = function(attr, word, filters) {
          return { 
-            attr: {key:attr,value:word, isExpression:true}
+            attr: {key:attr,value:word, isExpression:true, filters}
          };
       },
       peg$c57 = function(index) {
@@ -1571,7 +1571,7 @@ function peg$parse(input, options) {
   }
 
   function peg$parseExpressionAttribute() {
-    var s0, s1, s2, s3, s4, s5, s6, s7, s8, s9;
+    var s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11;
 
     s0 = peg$currPos;
     if (input.charCodeAt(peg$currPos) === 58) {
@@ -1603,7 +1603,12 @@ function peg$parse(input, options) {
             if (s5 !== peg$FAILED) {
               s6 = peg$parseExpression();
               if (s6 !== peg$FAILED) {
-                s7 = peg$parseStringSymbol();
+                s7 = [];
+                s8 = peg$parseFilter();
+                while (s8 !== peg$FAILED) {
+                  s7.push(s8);
+                  s8 = peg$parseFilter();
+                }
                 if (s7 !== peg$FAILED) {
                   s8 = [];
                   s9 = peg$parse_();
@@ -1612,9 +1617,26 @@ function peg$parse(input, options) {
                     s9 = peg$parse_();
                   }
                   if (s8 !== peg$FAILED) {
-                    peg$savedPos = s0;
-                    s1 = peg$c56(s1, s2, s6);
-                    s0 = s1;
+                    s9 = peg$parseStringSymbol();
+                    if (s9 !== peg$FAILED) {
+                      s10 = [];
+                      s11 = peg$parse_();
+                      while (s11 !== peg$FAILED) {
+                        s10.push(s11);
+                        s11 = peg$parse_();
+                      }
+                      if (s10 !== peg$FAILED) {
+                        peg$savedPos = s0;
+                        s1 = peg$c56(s2, s6, s7);
+                        s0 = s1;
+                      } else {
+                        peg$currPos = s0;
+                        s0 = peg$FAILED;
+                      }
+                    } else {
+                      peg$currPos = s0;
+                      s0 = peg$FAILED;
+                    }
                   } else {
                     peg$currPos = s0;
                     s0 = peg$FAILED;

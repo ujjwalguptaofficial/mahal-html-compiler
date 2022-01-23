@@ -120,7 +120,7 @@ Else= ":else"{
    return {ifExp: {else:true}}
 }
 
-For= ":for("_* key:Identifier _* index:ForIndex?  _* "in" _* value:Expression _* ")"{
+For = ":for("_* key:Identifier _* index:ForIndex?  _* "in" _* value:Expression _* ")"{
    return {forExp:{
       key, value,index : index || 'i'
    }}
@@ -130,9 +130,9 @@ SimpleAttribute = attr:Identifier _* "=" StringSymbol word: Word StringSymbol _*
    return {attr: {key:attr,value:word, isBind:false}};
 }
 
-ExpressionAttribute = isExpression:":" attr:Identifier _* "=" StringSymbol word:Expression StringSymbol _*{
+ExpressionAttribute = ":" attr:Identifier _* "=" StringSymbol word:Expression filters:Filter* _* StringSymbol _*{
    return { 
-      attr: {key:attr,value:word, isExpression:true}
+      attr: {key:attr,value:word, isExpression:true, filters}
    };
 }
 

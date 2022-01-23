@@ -194,7 +194,20 @@ export function createRenderer(template: string) {
                     attr.forEach((item, index) => {
                         if (item.isExpression) {
                             const val: IExpression = item.value as IExpression;
-                            attrString += `${item.key}:{v: ${val.expStr},k:'${val.keys[0]}'}`;
+                            if (item.filters.length > 0) {
+                                let method = `()=>{return `;
+                                let brackets = "";
+                                item.filters.reverse().forEach(item => {
+                                    method += `f('${item}',`
+                                    brackets += ")"
+                                });
+                                method += `${val.expStr} ${brackets} }`;
+                                attrString += `${item.key}:{v: ${method},k:'${val.keys[0]}', m:true}`;
+                            }
+                            else {
+                                const attributeValue = val.expStr;
+                                attrString += `${item.key}:{v: ${attributeValue},k:'${val.keys[0]}'}`;
+                            }
                         }
                         else {
                             attrString += `${item.key}:{v:'${item.value}'}`;

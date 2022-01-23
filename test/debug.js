@@ -2,7 +2,7 @@ const { createRenderer } = require("mahal-html-compiler");
 
 try {
     var fn = createRenderer(`
-            <button on:click="{update(editStudent)}">Update</butdton>
+            <button :class='gg' :name='name | upper'>Update</button>
 `);
 
     console.log(fn.toString());
