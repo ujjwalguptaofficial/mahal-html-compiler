@@ -9,7 +9,7 @@ import { convertArrayToString, createSetterForArray } from "./convert_array_to_c
 import beautify from 'js-beautify';
 import { IExpression } from "./add_ctx_to_expression";
 
-export function createRenderer(template: string) {
+export function createRenderer(template: string, moduleId?: string) {
     template = template.trim();
     let compiledParent;
     if (process.env.NODE_ENV == "test") {
@@ -188,6 +188,15 @@ export function createRenderer(template: string) {
 
                 // handle attributes
                 const attr = compiled.view.attr;
+                // for scoped, add 
+                if (moduleId) {
+                    attr.push({
+                        key: `'mahal-${moduleId}'`,
+                        value: '',
+                        isExpression: false,
+                        filters: []
+                    });
+                }
                 const attrLength = attr.length;
                 if (attrLength > 0) {
                     let attrString = '';
