@@ -2,6 +2,7 @@ import { createRenderer } from "mahal-html-compiler";
 import { expect } from "chai";
 import { createComponent } from "./create_component";
 import { mount } from "mahal-test-utils";
+import { HTML_TAG } from "mahal";
 
 
 describe('simple', function () {
@@ -158,4 +159,39 @@ describe('simple', function () {
         const btn = component.element;
         expect(btn.outerHTML.trim().length + 1).equal(text.trim().length)
     })
+
+    it('Img tag', async () => {
+        HTML_TAG['img'] = true;
+        const text = `
+			<img class="img-fluid img-profile rounded-circle mx-auto mb-2" src="img/profile.png" alt="profile" />
+
+`
+        const compClass = createComponent(`
+       ${text}
+            `)
+
+        const component = await mount(compClass);
+        const btn = component.element;
+        expect(btn.tagName).equal('IMG')
+    })
+
+    it('element with empty inner text', async () => {
+        const html = `<span class="navbar-toggler-icon"></span>`;
+
+        const compClass = createComponent(`
+        ${html}
+             `)
+
+        const component = await mount(compClass);
+        const btn = component.element;
+        expect(btn.tagName).equal('SPAN')
+    })
+
+    // it('element with new line in opening tag',()=>{
+    //     const html = `<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+    // 	aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    // 	<span class="navbar-toggler-icon">s</span>
+    // </button>`
+    // })
+
 })

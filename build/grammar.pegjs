@@ -126,7 +126,7 @@ For = ":for("_* key:Identifier _* index:ForIndex?  _* "in" _* value:Expression _
    }}
 }
 
-SimpleAttribute = attr:Identifier _* "=" StringSymbol word: Word StringSymbol _*{
+SimpleAttribute = attr:Identifier _* "=" StringSymbol word: AttributeValue StringSymbol _*{
    return {attr: {key:attr,value:word, isBind:false}};
 }
 
@@ -310,9 +310,11 @@ ObjectOneKeyVal = _* key: (ObjectKeyWithQuote/Identifier) _* ":" _* val:(Express
 
 PrimitiveValue = Number/String/Boolean/Prop ;
 
-Word "word" = val:[a-zA-Z0-9\&\ \|\.\$\!\=\-\:\;\#]+ {
+Word "word" = val:[a-zA-Z0-9\&\ \|\.\$\!\=\-\:\;\#\/\\]+ {
 	return val.join("");
 }
+
+AttributeValue "attribute value" = Word;
 
 Boolean "boolean" = val:("true" / "false") {
   return val=="true"?true:false;
