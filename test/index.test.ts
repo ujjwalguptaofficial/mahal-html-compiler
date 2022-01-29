@@ -1,5 +1,5 @@
 import "./simple.test";
-// import "./attribute.test";
+import "./attribute.test";
 import "./comment.test";
 import "./directive.test";
 import "./event.test";

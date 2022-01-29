@@ -1,14 +1,11 @@
-import { Component, Template } from "mahal";
-import { } from "mahal-test-utils";
-import { IRenderContext } from "mahal/dist/ts/interface";
+import { Component } from "mahal";
 import { createRenderer } from "mahal-html-compiler";
 
 export function createComponent(template: string, scoped?) {
+    const result = createRenderer(template, scoped);
 
     class MyComponent extends Component {
-        render(context: IRenderContext): Promise<HTMLElement> {
-            return createRenderer.call(context, template, scoped);
-        }
+        render = result as any;
     }
 
     return MyComponent;

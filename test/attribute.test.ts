@@ -23,17 +23,18 @@ describe('Comment', function () {
         `)
     })
 
-//     it('with scoped', async () => {
-//         const compClass = createComponent(`
-//         <button>Update</button>
-// `, 'dd');
+    it('with scoped', async () => {
+        const compClass = createComponent(`
+        <button>Update</button>
+`, 'dd');
 
-//         const component = await mount(compClass);
+        const component = await mount(compClass);
 
-//         const btn = component.find('button')
-//         expect(btn.textContent).equal('Update');
-//         // expect(val.toString()).equal(`function anonymous(renderer\n) {\nconst ctx = this;\nconst ce = renderer.createElement;\nconst ct = renderer.createTextNode;\nconst f = renderer.format;\nconst he = renderer.runExp;\nreturn ce(\'button\', [ct(\'Update\')], {\n    attr: {\n        \'mahal-dd\': {\n            v: \'\'\n        }\n    }\n})\n}`)
-//     })
+        const btn = component.element;
+        expect(btn.textContent).equal('Update');
+        expect(btn.hasAttribute('mahal-dd')).equal(true);
+        // expect(val.toString()).equal(`function anonymous(renderer\n) {\nconst ctx = this;\nconst ce = renderer.createElement;\nconst ct = renderer.createTextNode;\nconst f = renderer.format;\nconst he = renderer.runExp;\nreturn ce(\'button\', [ct(\'Update\')], {\n    attr: {\n        \'mahal-dd\': {\n            v: \'\'\n        }\n    }\n})\n}`)
+    })
 
     it('with scoped having some attributes', () => {
         createRenderer(`
