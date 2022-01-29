@@ -36,35 +36,17 @@ describe('Comment', function () {
         // expect(val.toString()).equal(`function anonymous(renderer\n) {\nconst ctx = this;\nconst ce = renderer.createElement;\nconst ct = renderer.createTextNode;\nconst f = renderer.format;\nconst he = renderer.runExp;\nreturn ce(\'button\', [ct(\'Update\')], {\n    attr: {\n        \'mahal-dd\': {\n            v: \'\'\n        }\n    }\n})\n}`)
     })
 
-    it('with scoped having some attributes', () => {
-        createRenderer(`
-        <button :class='gg' :name='name | upper'>Update</button>
+    it('with scoped having some attributes', async () => {
+        const compClass = createComponent(`
+        <button class='gg' name='ujjwal'>Update</button>
 `, 'dd');
-    })
 
-    it('with scoped with big text', () => {
-        createRenderer(`
-        <div>
-	<h1>
-		Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's
-		standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make
-		a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting,
-		remaining essentially unchanged.
-	</h1>
-</div>
-        `)
-    })
+        const component = await mount(compClass);
 
-    it('with scoped with big text and scoped', () => {
-        createRenderer(`
-        <div>
-	<h1>
-		Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's
-		standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make
-		a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting,
-		remaining essentially unchanged.
-	</h1>
-</div>
-        `)
+        const btn = component.element;
+        expect(btn.textContent).equal('Update');
+        expect(btn.hasAttribute('mahal-dd')).equal(true);
+        expect(btn.getAttribute('class')).equal('gg');
+        expect(btn.getAttribute('name')).equal('ujjwal');
     })
 })

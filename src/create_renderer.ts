@@ -22,12 +22,12 @@ export function createRenderer(template: string, moduleId?: string) {
             let string = `console.error(${JSON.stringify(ex.message)});`;
             string += "const template=`" + JSON.stringify(template) + "`;"
             string += `const location=${JSON.stringify(ex.location)};`;
-            string += `const css = 'background: #222; color: #bada55';`;
+            string += `const css = 'background: #28334AFF; color: #FBDE44FF; font-size:16px;';`;
             string += `const lines = template.split("\\n");`
             string += ` console.log("%c" + lines.slice(0, location.start.line - 1).join("\\n") +
             "%c" + lines.slice(location.start.line - 1, location.end.line).join("\\n") +
             "%c" + lines.slice(location.end.line).join("\\n")
-            , css, css + ';color:#ff0000', css);`;
+            , css, css + ';color:#F65058FF', css);`;
             string += `return document.createComment('');`
             return new Function(string);
         }
@@ -293,14 +293,14 @@ export function createRenderer(template: string, moduleId?: string) {
             str += `he(${method}, ${convertArrayToString(keys)},${unique()})`
         }
         else if ((compiled as any).trim().length > 0) {
-            str += `ct('${compiled}')`;
+            str += `ct(${JSON.stringify(compiled)})`;
         }
         return str;
     }
     parentStr += `return ${createJsEqFromCompiled(compiledParent)}`;
-    if (process.env.NODE_ENV != "production") {
-        parentStr = beautify(parentStr, { indent_size: 4, space_in_empty_paren: true })
-    }
+    // if (process.env.NODE_ENV != "production") {
+    //     parentStr = beautify(parentStr, { indent_size: 4, space_in_empty_paren: true })
+    // }
     // console.log("parentstr", parentStr);
     try {
         return new Function('renderer', parentStr);
