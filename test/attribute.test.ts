@@ -11,6 +11,18 @@ describe('Comment', function () {
         `)
     })
 
+    it('with empty attribute ', () => {
+        createRenderer(`
+        <div name=''></div>
+        `)
+    })
+
+    it('without attribute value', () => {
+        createRenderer(`
+        <div name></div>
+        `)
+    })
+
     it('with filter ', () => {
         createRenderer(`
         <div :name='ujjwal | upper'></div>
@@ -48,5 +60,31 @@ describe('Comment', function () {
         expect(btn.hasAttribute('mahal-dd')).equal(true);
         expect(btn.getAttribute('class')).equal('gg');
         expect(btn.getAttribute('name')).equal('ujjwal');
+    })
+
+    it('element with "-" in attribute', async () => {
+        const html = `<span class-name="navbar-toggler-icon"></span>`;
+
+        const compClass = createComponent(`
+        ${html}
+             `)
+
+        const component = await mount(compClass);
+        const btn = component.element;
+        expect(btn.tagName).equal('SPAN')
+        expect(btn.getAttribute('class-name')).equal('navbar-toggler-icon')
+    })
+
+    it('element with "-" in expression attribute', async () => {
+        const html = `<span :class-name="name"></span>`;
+
+        const compClass = createComponent(`
+        ${html}
+             `)
+
+        const component = await mount(compClass);
+        const btn = component.element;
+        expect(btn.tagName).equal('SPAN')
+        expect(btn.getAttribute('class-name')).equal('ujjwal gupta')
     })
 })

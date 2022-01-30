@@ -36,4 +36,18 @@ describe('Directive', function () {
         `)
     })
 
+    it('directive with - ', () => {
+        createRenderer(`
+        <div :click-outside(flag===true)>
+        </div>
+        `)
+    })
+
+    it('directive without parenthesis', () => {
+        createRenderer(`
+        <div :click-outside>
+        </div>
+        `)
+    })
+
 })

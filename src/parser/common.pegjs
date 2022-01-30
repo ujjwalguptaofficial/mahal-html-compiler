@@ -73,11 +73,7 @@ HtmlOpen = LtSymbol word: XmlTag?  option:(HtmlOpenOption)* {
  return result;
 }
 
-SpaceAndNewLine = _* NewLine*
-
-NewLineAndSpace = NewLine* _*
-
-HtmlOpenOption = value:((If/ElseIf/Else)/For/(Event)/Attribute/InnerHtml/Directive/NewLine/_)  _* {
+HtmlOpenOption = value:((If/ElseIf/Else)/For/(Event)/Attribute/Directive/NewLine/_)  _* {
   if(value==null){
     return null;
   }
@@ -137,13 +133,17 @@ For = ":for("_* key:Identifier _* index:ForIndex?  _* "in" _* value:Expression _
    }}
 }
 
-SimpleAttribute = attr:Identifier _* "=" StringSymbol word: AttributeValue StringSymbol _*{
-   return {attr: {key:`'${attr}'`,value:word, isBind:false}};
+SimpleAttribute = attr:Identifier _* word:SimpleAttributeAssignment? _* {
+   return {attr: {key:`'${attr}'`,value:word||''}};
+}
+
+SimpleAttributeAssignment = "=" StringSymbol word: AttributeValue? StringSymbol {
+  return word;
 }
 
 ExpressionAttribute = ":" attr:Identifier _* "=" StringSymbol word:Expression filters:Filter* _* StringSymbol _*{
    return { 
-      attr: {key:attr,value:word, isExpression:true, filters}
+      attr: {key:`'${attr}'`,value:word, isExpression:true, filters}
    };
 }
 
@@ -153,9 +153,6 @@ ForIndex = "," _* index:Identifier{
 	return index ;
 }
 
-InnerHtml= ":html" _* "=" StringSymbol? val:Identifier StringSymbol? {
-   return {html: val};
-}
 
 LtSymbol "<" = [<];
 

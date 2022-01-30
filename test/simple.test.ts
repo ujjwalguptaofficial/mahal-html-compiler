@@ -187,31 +187,6 @@ describe('simple', function () {
         expect(btn.tagName).equal('SPAN')
     })
     
-    it('element with - in attribute', async () => {
-        const html = `<span class-name="navbar-toggler-icon"></span>`;
-
-        const compClass = createComponent(`
-        ${html}
-             `)
-
-        const component = await mount(compClass);
-        const btn = component.element;
-        expect(btn.tagName).equal('SPAN')
-        expect(btn.getAttribute('class-name')).equal('navbar-toggler-icon')
-    })
-
-    it('element with - in expression attribute', async () => {
-        const html = `<span :class-name="name"></span>`;
-
-        const compClass = createComponent(`
-        ${html}
-             `)
-
-        const component = await mount(compClass);
-        const btn = component.element;
-        expect(btn.tagName).equal('SPAN')
-        expect(btn.getAttribute('class-name')).equal('navbar-toggler-icon')
-    })
 
     it('element with new line in opening tag', async () => {
         const html = `<button
