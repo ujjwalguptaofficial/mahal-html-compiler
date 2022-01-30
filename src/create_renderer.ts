@@ -298,9 +298,9 @@ export function createRenderer(template: string, moduleId?: string) {
         return str;
     }
     parentStr += `return ${createJsEqFromCompiled(compiledParent)}`;
-    // if (process.env.NODE_ENV != "production") {
-    //     parentStr = beautify(parentStr, { indent_size: 4, space_in_empty_paren: true })
-    // }
+    if (process.env.NODE_ENV != "production") {
+        parentStr = beautify(parentStr, { indent_size: 4, space_in_empty_paren: true })
+    }
     // console.log("parentstr", parentStr);
     try {
         return new Function('renderer', parentStr);

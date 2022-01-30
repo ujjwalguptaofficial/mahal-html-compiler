@@ -186,12 +186,60 @@ describe('simple', function () {
         const btn = component.element;
         expect(btn.tagName).equal('SPAN')
     })
+    
+    it('element with - in attribute', async () => {
+        const html = `<span class-name="navbar-toggler-icon"></span>`;
 
-    // it('element with new line in opening tag',()=>{
-    //     const html = `<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-    // 	aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-    // 	<span class="navbar-toggler-icon">s</span>
-    // </button>`
-    // })
+        const compClass = createComponent(`
+        ${html}
+             `)
+
+        const component = await mount(compClass);
+        const btn = component.element;
+        expect(btn.tagName).equal('SPAN')
+        expect(btn.getAttribute('class-name')).equal('navbar-toggler-icon')
+    })
+
+    it('element with - in expression attribute', async () => {
+        const html = `<span :class-name="name"></span>`;
+
+        const compClass = createComponent(`
+        ${html}
+             `)
+
+        const component = await mount(compClass);
+        const btn = component.element;
+        expect(btn.tagName).equal('SPAN')
+        expect(btn.getAttribute('class-name')).equal('navbar-toggler-icon')
+    })
+
+    it('element with new line in opening tag', async () => {
+        const html = `<button
+>
+    </button>`
+
+        const compClass = createComponent(`
+    ${html}
+         `)
+
+        const component = await mount(compClass);
+        const btn = component.element;
+        expect(btn.tagName).equal('BUTTON')
+    })
+
+    it('element with new line in opening tag and space', async () => {
+        const html = `<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+    	aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    	<span class="navbar-toggler-icon"></span>
+    </button>`
+
+        const compClass = createComponent(`
+    ${html}
+         `)
+
+        const component = await mount(compClass);
+        const btn = component.element;
+        expect(btn.tagName).equal('BUTTON')
+    })
 
 })

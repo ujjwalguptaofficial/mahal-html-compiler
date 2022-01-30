@@ -6,6 +6,8 @@ export function createComponent(template: string, scoped?) {
 
     class MyComponent extends Component {
         render = result as any;
+
+        name = 'ujjwal gupta'
     }
 
     return MyComponent;

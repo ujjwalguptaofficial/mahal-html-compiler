@@ -43,7 +43,7 @@ HtmlTagSelfClosing = openTag:HtmlOpen "/" GtSymbol {
   }
 }
 
-HtmlOpen = LtSymbol word: XmlTag? _* option:(HtmlOpenOption)* {
+HtmlOpen = LtSymbol word: XmlTag?  option:(HtmlOpenOption)* {
   const result = {
      tag:word || 'fragment',
      events:[],
@@ -51,7 +51,7 @@ HtmlOpen = LtSymbol word: XmlTag? _* option:(HtmlOpenOption)* {
      dir:{}
   }
   option.forEach(val=>{
-    const key = Object.keys(val)[0];
+    const key = val?Object.keys(val)[0]:null;
     switch(key){
       case 'event':
         result.events.push(val[key]);break;
@@ -61,6 +61,8 @@ HtmlOpen = LtSymbol word: XmlTag? _* option:(HtmlOpenOption)* {
          const dirValue = val[key];
          result.dir[dirValue.name]=dirValue.value;
          break;
+      case null:
+        break;
       default:
         result[key] = val[key]   
     }
@@ -71,7 +73,15 @@ HtmlOpen = LtSymbol word: XmlTag? _* option:(HtmlOpenOption)* {
  return result;
 }
 
-HtmlOpenOption = value:((If/ElseIf/Else)/For/(Event)/Attribute/InnerHtml/Directive) _* {
+SpaceAndNewLine = _* NewLine*
+
+NewLineAndSpace = NewLine* _*
+
+HtmlOpenOption = value:((If/ElseIf/Else)/For/(Event)/Attribute/InnerHtml/Directive/NewLine/_)  _* {
+  if(value==null){
+    return null;
+  }
+  
   const key = Object.keys(value)[0];
   return {
      [key]:value[key]
@@ -88,6 +98,7 @@ XmlTag "html tag" = val:[a-zA-Z0-9-_]+ {
 
 
 Ws "Whitespace" = [ \t];
+NewLine "New Line" = [\n]+ {return null;}
 
 _ "One or more whitespaces" = space:Ws+ {return null;}
 
@@ -127,7 +138,7 @@ For = ":for("_* key:Identifier _* index:ForIndex?  _* "in" _* value:Expression _
 }
 
 SimpleAttribute = attr:Identifier _* "=" StringSymbol word: AttributeValue StringSymbol _*{
-   return {attr: {key:attr,value:word, isBind:false}};
+   return {attr: {key:`'${attr}'`,value:word, isBind:false}};
 }
 
 ExpressionAttribute = ":" attr:Identifier _* "=" StringSymbol word:Expression filters:Filter* _* StringSymbol _*{
