@@ -318,7 +318,7 @@ ObjectOneKeyVal = _* key: (ObjectKeyWithQuote/Identifier) _* ":" _* val:(Express
 
 PrimitiveValue = Number/String/Boolean/Prop ;
 
-Word "word" = val:[a-zA-Z0-9\&\ \|\.\$\!\=\-\:\;\#\/\\]+ {
+Word "word" = val:[a-zA-Z0-9\&\ \|\.\$\!\=\-\:\;\#\/\\%]+ {
 	return val.join("");
 }
 

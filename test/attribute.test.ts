@@ -87,4 +87,16 @@ describe('Comment', function () {
         expect(btn.tagName).equal('SPAN')
         expect(btn.getAttribute('class-name')).equal('ujjwal gupta')
     })
+
+    it('% in attribute', async () => {
+        const html = `<div class="my-auto" style="width: 100%;"></div>`
+
+        const compClass = createComponent(`
+    ${html}
+         `)
+
+        const component = await mount(compClass);
+        const btn = component.element;
+        expect(btn.tagName).equal('DIV')
+    })
 })
