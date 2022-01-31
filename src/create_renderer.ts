@@ -8,10 +8,11 @@ import { removeCommaFromLast } from "./remove_comma_from_last";
 import { convertArrayToString, createSetterForArray } from "./convert_array_to_comma_seperated_string";
 import beautify from 'js-beautify';
 import { IExpression } from "./add_ctx_to_expression";
+import { EOL } from "os";
 
 export function createRenderer(template: string, moduleId?: string) {
     template = template.trim();
-    let compiledParent;
+    let compiledParent: ICompiledView;
     if (process.env.NODE_ENV == "test") {
         compiledParent = parseview(template);
     }
@@ -19,17 +20,66 @@ export function createRenderer(template: string, moduleId?: string) {
         try {
             compiledParent = parseview(template);
         } catch (ex) {
-            let string = `console.error(${JSON.stringify(ex.message)});`;
-            string += "const template=`" + JSON.stringify(template) + "`;"
-            string += `const location=${JSON.stringify(ex.location)};`;
-            string += `const css = 'background: #28334AFF; color: #FBDE44FF; font-size:16px;';`;
-            string += `const lines = template.split("\\n");`
-            string += ` console.log("%c" + lines.slice(0, location.start.line - 1).join("\\n") +
-            "%c" + lines.slice(location.start.line - 1, location.end.line).join("\\n") +
-            "%c" + lines.slice(location.end.line).join("\\n")
-            , css, css + ';color:#F65058FF', css);`;
-            string += `return document.createComment('');`
-            return new Function(string);
+            // let string = `console.error(${JSON.stringify(ex.message)});`;
+            // string += "const template=`" + JSON.stringify(template) + "`;"
+            // string += `const location=${JSON.stringify(ex.location)};`;
+            // string += `const css = 'background: #28334AFF; color: #FBDE44FF; font-size:16px;';`;
+            // string += `const lines = template.split("\\n");`
+            // string += ` console.log("%c" + lines.slice(0, location.start.line - 1).join("\\n") +
+            // "%c" + lines.slice(location.start.line - 1, location.end.line).join("\\n") +
+            // "%c" + lines.slice(location.end.line).join("\\n")
+            // , css, css + ';color:#F65058FF', css);`;
+            // string += `return Promise.resolve(document.createComment(null));`
+            // return new Function(string);
+            const location = ex.location;
+            const lines = template.split(EOL);
+            compiledParent = {
+                view: {
+                    tag: "p",
+                    attr: [{
+                        key: 'style',
+                        value: 'background: #28334AFF; color: #FBDE44FF; font-size:16px; position:fixed;width:100%;max-height:100%;overflow-y:auto;top:0;left:0;padding:20px;z-index:100000000000000000000000;',
+                        isExpression: false,
+                        filters: [],
+                    }],
+                    events: [],
+                },
+                child: [
+                    {
+                        view: {
+                            tag: "p",
+                            attr: [{
+                                key: 'style',
+                                value: 'color:#F65058FF; margin:20px 0; border:1px solid;padding:15px;',
+                                isExpression: false,
+                                filters: [],
+                            }],
+                            events: []
+                        },
+                        child: [
+                            ex.message
+                        ],
+                    },
+                    lines.slice(0, location.start.line - 1).join("\\n") as any,
+                    {
+                        view: {
+                            tag: "p",
+                            attr: [{
+                                key: 'style',
+                                value: 'color:#F65058FF',
+                                isExpression: false,
+                                filters: [],
+                            }],
+                            events: []
+                        },
+                        child: [
+                            lines.slice(location.start.line - 1, location.end.line).join("\\n")
+                        ],
+                    },
+                    lines.slice(location.end.line).join("\\n")
+                ],
+            }
+
         }
     }
 
@@ -183,9 +233,9 @@ export function createRenderer(template: string, moduleId?: string) {
                     // optionStr += "}"
                 }
 
-                if (compiled.view.html) {
-                    optionStr += `${optionStr.length > 2 ? "," : ''} html:ctx.${compiled.view.html}`;
-                }
+                // if (compiled.view.html) {
+                //     optionStr += `${optionStr.length > 2 ? "," : ''} html:ctx.${compiled.view.html}`;
+                // }
 
                 // handle attributes
                 const attr = compiled.view.attr;

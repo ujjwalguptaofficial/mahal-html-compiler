@@ -7,13 +7,13 @@ export interface IIfExpModified {
 export interface ICompiledView {
     view: {
         tag: string,
-        ifExpModified: IIfExpModified,
-        ifExp: {
+        ifExpModified?: IIfExpModified,
+        ifExp?: {
             ifCond: IExpression;
             elseIfCond: IExpression;
             else: boolean;
         },
-        forExp: {
+        forExp?: {
             key: string;
             value: IExpression;
             index: string;
@@ -24,8 +24,7 @@ export interface ICompiledView {
             isExpression: Boolean,
             filters: string[]
         }[],
-        model: string,
-        html: string,
+        model?: string,
         events: {
             name: string;
             handlers: string[];
@@ -33,11 +32,11 @@ export interface ICompiledView {
             isNative: boolean,
             modifiers: string[]
         }[],
-        dir: {
+        dir?: {
             [name: string]: IExpression[]
         }
     },
-    mustacheExp: IExpression,
+    mustacheExp?: IExpression,
     child: ICompiledView[]
-    filters: string[];
+    filters?: string[];
 }
