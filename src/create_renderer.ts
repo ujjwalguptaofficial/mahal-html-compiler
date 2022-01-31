@@ -50,7 +50,8 @@ export function createRenderer(template: string, moduleId?: string) {
         let str = "";
         if (compiled.view) {
             const handleTag = () => {
-                let tagHtml = `ce('${compiled.view.tag}',`
+                const htmlTag = compiled.view.tag;
+                let tagHtml = htmlTag == null ? `ce(null,` : `ce('${htmlTag}',`
                 if (compiled.child) {
                     let ifModifiedExpression: IIfExpModified;
                     let indexOfIfCond;

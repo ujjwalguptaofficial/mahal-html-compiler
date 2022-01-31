@@ -186,7 +186,7 @@ describe('simple', function () {
         const btn = component.element;
         expect(btn.tagName).equal('SPAN')
     })
-    
+
 
     it('element with new line in opening tag', async () => {
         const html = `<button
@@ -217,6 +217,12 @@ describe('simple', function () {
         expect(btn.tagName).equal('BUTTON')
     })
 
-  
+    it('comment', async () => {
+        debugger;
+        const compClass = createComponent(`<div><!-- Author of JsStore --></div>`);
+        const component = await mount(compClass);
+        const btn = component.element;
+        expect(btn.tagName).equal('DIV')
+    })
 
 })

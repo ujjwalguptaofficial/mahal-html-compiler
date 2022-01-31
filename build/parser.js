@@ -470,8 +470,8 @@ function peg$parse(input, options) {
         //return {[key]:val};
       },
       peg$c137 = peg$otherExpectation("word"),
-      peg$c138 = /^[a-zA-Z0-9& |.$!=\-:;#\/\\%]/,
-      peg$c139 = peg$classExpectation([["a", "z"], ["A", "Z"], ["0", "9"], "&", " ", "|", ".", "$", "!", "=", "-", ":", ";", "#", "/", "\\", "%"], false, false),
+      peg$c138 = /^[a-zA-Z0-9& |.$!=\-:;#\/\\%_@]/,
+      peg$c139 = peg$classExpectation([["a", "z"], ["A", "Z"], ["0", "9"], "&", " ", "|", ".", "$", "!", "=", "-", ":", ";", "#", "/", "\\", "%", "_", "@"], false, false),
       peg$c140 = peg$otherExpectation("attribute value"),
       peg$c141 = peg$otherExpectation("boolean"),
       peg$c142 = "true",

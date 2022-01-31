@@ -2,7 +2,6 @@ import { expect } from "chai";
 import { createRenderer } from "../src/index";
 import { createComponent } from "./create_component";
 import { mount } from "mahal-test-utils";
-import { Component } from "mahal";
 
 describe('Comment', function () {
     it('with simple ', () => {
@@ -88,8 +87,8 @@ describe('Comment', function () {
         expect(btn.getAttribute('class-name')).equal('ujjwal gupta')
     })
 
-    it('% in attribute', async () => {
-        const html = `<div class="my-auto" style="width: 100%;"></div>`
+    it('diff char in attribute', async () => {
+        const html = `<div target="_blank@" class="my-auto" style="width: 100%;"></div>`
 
         const compClass = createComponent(`
     ${html}
