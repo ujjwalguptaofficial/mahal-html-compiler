@@ -79,9 +79,9 @@ describe('simple', function () {
      </div>`);
     })
 
-    it('@ inside html tag', () => {
+    it('@{} inside html tag', () => {
         createRenderer(`<div>
-        @
+        @{}
      </div>`);
     })
 
@@ -218,7 +218,6 @@ describe('simple', function () {
     })
 
     it('comment', async () => {
-        debugger;
         const compClass = createComponent(`<div><!-- Author of JsStore --></div>`);
         const component = await mount(compClass);
         const btn = component.element;

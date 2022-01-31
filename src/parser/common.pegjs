@@ -278,7 +278,11 @@ EventAssignment "Event Assignment"= val:[a-zA-Z0-9\&\=\>\{\}\(\)\ \|\[\]\,\.]+ {
 	return val.join("");
 }
 
-Html "html"= val: [^<>{}]+ {
+/*Html "html"= val: [^<>{}]+ {
+	return val.join("").replace(/[\n\r]/gm, "").replace(/\s\s+/g, ' ');
+}*/
+
+Html "html"=  val:(!"<" !">" !"{{" !"}}" c:. {return c})+ {
 	return val.join("").replace(/[\n\r]/gm, "").replace(/\s\s+/g, ' ');
 }
 
