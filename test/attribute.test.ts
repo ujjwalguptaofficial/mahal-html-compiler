@@ -16,6 +16,12 @@ describe('Comment', function () {
         `)
     })
 
+    it('with special char in expression attribute ', () => {
+        createRenderer(`
+        <div :name="'profile1_~!@#$%^&*()-_=+.jpg' | imgPath"></div>
+        `)
+    })
+
     it('without attribute value', () => {
         createRenderer(`
         <div name></div>

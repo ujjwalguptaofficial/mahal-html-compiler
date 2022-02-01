@@ -336,7 +336,7 @@ Number "number" = val:[0-9]+ {
    return Number(val.join(""));
 }
 
-String "string" = StringSymbol val:[a-zA-Z0-9\&\ \.\$\!\=\-\:\;\#]+ StringSymbol {
+String "string" = StringSymbol val:[a-zA-Z0-9\&\ \.\:\;\~\!\@\#\$\%\^\&\*\(\)\-\_\=\+]+ StringSymbol {
    return `'${val.join("")}'`;
 }
 

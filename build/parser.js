@@ -490,8 +490,8 @@ function peg$parse(input, options) {
          return Number(val.join(""));
       },
       peg$c153 = peg$otherExpectation("string"),
-      peg$c154 = /^[a-zA-Z0-9& .$!=\-:;#]/,
-      peg$c155 = peg$classExpectation([["a", "z"], ["A", "Z"], ["0", "9"], "&", " ", ".", "$", "!", "=", "-", ":", ";", "#"], false, false),
+      peg$c154 = /^[a-zA-Z0-9& .:;~!@#$%\^&*()\-_=+]/,
+      peg$c155 = peg$classExpectation([["a", "z"], ["A", "Z"], ["0", "9"], "&", " ", ".", ":", ";", "~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "=", "+"], false, false),
       peg$c156 = function(val) {
          return `'${val.join("")}'`;
       },
