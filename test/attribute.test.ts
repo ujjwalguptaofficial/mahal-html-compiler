@@ -18,7 +18,13 @@ describe('Comment', function () {
 
     it('with special char in expression attribute ', () => {
         createRenderer(`
-        <div :name="'profile1_~!@#$%^&*()-_=+.jpg' | imgPath"></div>
+        <div :name="'1234567890p rofile1_~!@#$%^&*()-_=+{}[]:;.jpg|\<,>.?/' | imgPath"></div>
+        `)
+    })
+
+    it('with special char in attribute ', () => {
+        createRenderer(`
+        <div name="1234567890p rofile1_~!@#$%^&*()-_=+{}[]:;.jpg|\<,>.?/"></div>
         `)
     })
 

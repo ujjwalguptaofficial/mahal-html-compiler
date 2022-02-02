@@ -336,7 +336,9 @@ Word "word" = val:[a-zA-Z0-9\&\ \|\.\$\!\=\-\:\;\#\/\\%\_\@]+ {
 	return val.join("");
 }
 
-AttributeValue "attribute value" = Word;
+AttributeValue "attribute value" = val:(!"'" !'"' c:. {return c})+ {
+  return val.join("");
+}
 
 Boolean "boolean" = val:("true" / "false") {
   return val=="true"?true:false;
@@ -346,7 +348,11 @@ Number "number" = val:[0-9]+ {
    return Number(val.join(""));
 }
 
-String "string" = StringSymbol val:[a-zA-Z0-9\&\ \.\:\;\~\!\@\#\$\%\^\&\*\(\)\-\_\=\+]+ StringSymbol {
+Everything = val: (c:. {return c})*{
+  return val.join('')
+}
+
+String "string" = StringSymbol val:(!"'" !'"' c:. {return c})+ StringSymbol {
    return `'${val.join("")}'`;
 }
 
