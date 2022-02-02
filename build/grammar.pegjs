@@ -1,50 +1,7 @@
 {
  const CTX = "ctx";
-}
-HtmlTag = HtmlTagClosing/HtmlTagSelfClosing/HtmlComment
-
-HtmlComment = HtmlCommentStart word:CommentContent  "-->" {
-  return {
-    view:{
-       tag:null,
-       events:[],
-       attr:[]
-    },
-    child:[word]
-  }
-}
-
-HtmlCommentStart "<!--" = "<!--"
-
-
-CommentContent "comment content" = word: (!"-->" c:. {return c})* {
- return word.join('')
-}
-
-
-
-HtmlTagClosing = openTag:HtmlOpen GtSymbol child:(HtmlTag/Html/MustacheExpression)* closeTag:CloseTag {
- 
- const openTagValue = openTag.tag;
- if (openTagValue != closeTag) {
-        error("Expected </" + openTagValue + "> but </" + closeTag + "> found.");
-  }
-  return {
-   view:openTag,
-   child: child.filter(item=> {
-      return item!=null && typeof item==='string'?item.trim().length!==0:true
-   })
-  }
-}
-
-HtmlTagSelfClosing = openTag:HtmlOpen "/" GtSymbol {
-  return {
-    view:openTag
-  }
-}
-
-HtmlOpen = LtSymbol word: XmlTag?  option:(HtmlOpenOption)* {
-  const result = {
+ const handleHtmlOpen = (word,option)=>{
+   const result = {
      tag:word || 'fragment',
      events:[],
      attr:[],
@@ -71,6 +28,58 @@ HtmlOpen = LtSymbol word: XmlTag?  option:(HtmlOpenOption)* {
      delete result.dir;
   }
  return result;
+ }
+}
+HtmlTag = HtmlTagClosing/HtmlTagSelfClosing/HtmlComment/HtmlPreTag
+
+HtmlComment = HtmlCommentStart word:CommentContent  "-->" {
+  return {
+    view:{
+       tag:null,
+       events:[],
+       attr:[]
+    },
+    child:[word]
+  }
+}
+
+HtmlCommentStart "<!--" = "<!--"
+
+
+CommentContent "comment content" = word: (!"-->" c:. {return c})* {
+ return word.join('')
+}
+
+
+HtmlTagClosing = openTag:HtmlOpen GtSymbol child:(HtmlTag/Html/MustacheExpression)* closeTag:CloseTag {
+ 
+ const openTagValue = openTag.tag;
+ if (openTagValue != closeTag) {
+        error("Expected </" + openTagValue + "> but </" + closeTag + "> found.");
+  }
+  return {
+   view:openTag,
+   child: child.filter(item=> {
+      return item!=null && typeof item==='string'?item.trim().length!==0:true
+   })
+  }
+}
+
+HtmlTagSelfClosing = openTag:HtmlOpen "/" GtSymbol {
+  return {
+    view:openTag
+  }
+}
+
+HtmlOpen = LtSymbol word: XmlTag?  option:(HtmlOpenOption)* {
+ return handleHtmlOpen(word,option);
+}
+
+HtmlPreTag = LtSymbol "pre"  option:(HtmlOpenOption)* GtSymbol content:( !"</pre>" c:. {return c})* "</pre>" {
+ return {
+   view: handleHtmlOpen("pre",option),
+   child: [content.join('')]
+  }
 }
 
 HtmlOpenOption = value:((If/ElseIf/Else)/For/(Event)/Attribute/Directive/NewLine/_)  _* {
@@ -88,7 +97,8 @@ CloseTag "close tag"= StartCloseTag word: XmlTag? GtSymbol{
   return word || 'fragment'
 }
 
-XmlTag "html tag" = val:[a-zA-Z0-9-_]+ {
+
+XmlTag "html tag" = !"pre" val:[a-zA-Z0-9-_]+ {
   return val.join("");
 }
 

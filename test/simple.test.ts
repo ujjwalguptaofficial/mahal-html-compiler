@@ -224,4 +224,29 @@ describe('simple', function () {
         expect(btn.tagName).equal('DIV')
     })
 
+    it('pre tag', async () => {
+        const text = `<pre>
+        dddd {{name}}
+        </pre>`;
+        const compClass = createComponent(text);
+        const component = await mount(compClass);
+        const btn = component.element;
+        expect(btn.tagName).equal('PRE');
+        expect(btn.textContent).equal(text.replace('<pre>', '').replace('</pre>', ''));
+    })
+
+    it('pre tag opposite', async () => {
+        const text = `<div>
+        dddd {{name}}
+        </div>`;
+        const compClass = createComponent(text);
+        const component = await mount(compClass);
+        const btn = component.element;
+        expect(btn.tagName).equal('DIV');
+        const removingSpaceAndNewLine = text.replace('<div>', '').replace('</div>', '')
+            .replace(/[\n\r]/gm, "").replace(/\s\s+/g, ' ')
+            .replace('{{name}}', 'ujjwal gupta').trimEnd();
+        expect(btn.textContent).equal(removingSpaceAndNewLine);
+    })
+
 })
