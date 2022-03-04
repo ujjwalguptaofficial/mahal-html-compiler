@@ -39,4 +39,5 @@ export interface ICompiledView {
     mustacheExp?: IExpression,
     child: ICompiledView[]
     filters?: string[];
+    localVars?: string[];
 }

@@ -1,14 +1,16 @@
 import { parseview } from "./parse_view";
 import { LogHelper } from "./utils";
 import { ERROR_TYPE } from "./enums";
-import { contextString } from "./constant";
+import { CONTEXT_STRING } from "./constant";
 import { ICompiledView, IIfExpModified } from "./interface";
-import { unique } from "./unique";
 import { removeCommaFromLast } from "./remove_comma_from_last";
-import { convertArrayToString, createSetterForArray } from "./convert_array_to_comma_seperated_string";
+import { convertArrayToString, createSetterForDirective } from "./convert_array_to_comma_seperated_string";
 import beautify from 'js-beautify';
 import { IExpression } from "./add_ctx_to_expression";
 import { EOL } from "os";
+import { handleLocalVar } from "./handle_local_var";
+
+const CTX = CONTEXT_STRING;
 
 export function createRenderer(template: string, moduleId?: string) {
     template = template.trim();
@@ -90,7 +92,7 @@ export function createRenderer(template: string, moduleId?: string) {
             throw new LogHelper(ERROR_TYPE.ForExpAsRoot).get();
         }
     }
-    let parentStr = `const ${contextString}= this;
+    let parentStr = `const ${CONTEXT_STRING}= this;
     const ce = renderer.createElement;
     const ct = renderer.createTextNode;
     const f = renderer.format;
@@ -120,13 +122,25 @@ export function createRenderer(template: string, moduleId?: string) {
                         }
                         indexOfIfCond = null;
                     }
+                    const forExp = compiled.view.forExp;
+                    let localVars = compiled.localVars || [];
+                    if (forExp) {
+                        const forExpkey = forExp.key;
+                        const forExpindex = forExp.index;
+                        const forValue = forExp.value.raw;
+                        localVars.push(forExpkey, `${forExpkey}.`, `${forExpkey}[`, forExpindex, `${forValue}[${forExpindex}]`)
+                    }
                     compiled.child.forEach((child, index) => {
+                        if (typeof child === 'object') {
+                            child.localVars = child.localVars ? child.localVars.concat(localVars) : localVars;
+                        }
                         if (!(child.view && child.view.ifExp)) {
                             return onIfCondEnd(index);
                         }
                         const ifExp = child.view.ifExp;
                         if (ifExp.ifCond) {
                             isIfCondEndFound = false;
+                            handleLocalVar(compiled.localVars, ifExp.ifCond);
                             ifModifiedExpression = {
                                 ifExp: ifExp.ifCond,
                                 ifElseList: []
@@ -183,7 +197,14 @@ export function createRenderer(template: string, moduleId?: string) {
                     compiled.view.events.forEach((ev, index) => {
                         let handlerStr = "[";
                         ev.handlers.forEach(item => {
-                            handlerStr += item.replace(identifierRegex, 'ctx.$1') + ",";
+                            let replacedStr = item.replace(identifierRegex, `${CTX}.$1`) + ",";
+                            const exp = {
+                                expStr: replacedStr,
+                                keys: [],
+                                raw: ''
+                            };
+                            handleLocalVar(compiled.localVars, exp);
+                            handlerStr += exp.expStr;
                         });
                         handlerStr = removeCommaFromLast(handlerStr) + "]";
                         eventStr += `${ev.name}: {
@@ -211,17 +232,24 @@ export function createRenderer(template: string, moduleId?: string) {
                         }
                         compiled.view.dir[dirName].forEach(dirValue => {
                             // const expressionEvaluation = addCtxToExpression(dirValue);
+                            // compiled.localVars.forEach(localVar => {
+                            //     if (dirValue.expStr.includes(localVar)) {
+                            //         dirValue.expStr = dirValue.raw.replace(CTX + ".", '');
+                            //         const indexOfKey = dirValue.keys.findIndex(q => q.includes(localVar));
+                            //         dirValue.keys.splice(indexOfKey, 1);
+                            //     }
+                            // })
+                            handleLocalVar(compiled.localVars, dirValue);
                             dirBinding.value.push(dirValue.expStr)
                             dirBinding.props = [...dirBinding.props, ...dirValue.keys]
                             dirBinding.params.push(dirValue.raw)
                         })
-
                         optionStr += `${dirName}:{ 
                                 get value(){ 
                                     return ${convertArrayToString(dirBinding.value, false)} 
                                 },
                                 set value(values){
-                                    ${createSetterForArray(dirBinding.value, 'values')}
+                                    ${createSetterForDirective(dirBinding, CTX)}
                                 },
                                 props:${convertArrayToString(dirBinding.props)},
                                 params: ${convertArrayToString(dirBinding.value, false)}
@@ -254,6 +282,10 @@ export function createRenderer(template: string, moduleId?: string) {
                     attr.forEach((item, index) => {
                         if (item.isExpression) {
                             const val: IExpression = item.value as IExpression;
+                            handleLocalVar(compiled.localVars, val);
+                            const getKey = () => {
+                                return val.keys.length > 0 ? `'${val.keys[0]}'` : null
+                            }
                             if (item.filters.length > 0) {
                                 let method = `()=>{return `;
                                 let brackets = "";
@@ -262,11 +294,11 @@ export function createRenderer(template: string, moduleId?: string) {
                                     brackets += ")"
                                 });
                                 method += `${val.expStr} ${brackets} }`;
-                                attrString += `${item.key}:{v: ${method},k:'${val.keys[0]}', m:true}`;
+                                attrString += `${item.key}:{v: ${method},k: ${getKey()} , m:true}`;
                             }
                             else {
                                 const attributeValue = val.expStr;
-                                attrString += `${item.key}:{v: ${attributeValue},k:'${val.keys[0]}'}`;
+                                attrString += `${item.key}:{v: ${attributeValue},k:${getKey()}}`;
                             }
                         }
                         else {
@@ -287,13 +319,12 @@ export function createRenderer(template: string, moduleId?: string) {
             const handleFor = (value: string) => {
                 let forExp = compiled.view.forExp;
                 const { keys } = forExp.value;
-                const getRegex = (subStr) => {
-                    return new RegExp(subStr, 'g');
-                }
+                // const getRegex = (subStr) => {
+                //     return new RegExp(subStr, 'g');
+                // }
                 return `...he((${forExp.key},${forExp.index})=>{
-                            return ${value.replace(getRegex(`ctx.${forExp.key}`), forExp.key).
-                        replace(getRegex(`ctx.${forExp.index}`), forExp.index)
-                    }
+                            return ${value} 
+                    
                         },${convertArrayToString(keys)},'for')
                 `
                 //return forStr;
@@ -339,9 +370,10 @@ export function createRenderer(template: string, moduleId?: string) {
                 method += `f('${item}',`
                 brackets += ")"
             });
+            handleLocalVar(compiled.localVars, compiled.mustacheExp);
             const { keys, expStr } = compiled.mustacheExp;
             method += `${expStr} ${brackets} )}`;
-            str += `he(${method}, ${convertArrayToString(keys)},${unique()})`
+            str += `he(${method}, ${convertArrayToString(keys)})`
         }
         else if ((compiled as any).trim().length > 0) {
             str += `ct(${JSON.stringify(compiled)})`;

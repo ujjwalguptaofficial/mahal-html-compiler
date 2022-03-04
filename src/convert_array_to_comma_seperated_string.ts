@@ -1,5 +1,6 @@
 import { removeCommaFromLast } from "./remove_comma_from_last";
 import { comparisionOpRegex, stringRegex } from "./constant";
+import { IDirectiveBinding } from "./interface";
 
 export function convertArrayToString(value: string[], shouldAddSingleQuote = true) {
     let result = "[";
@@ -13,12 +14,22 @@ export function convertArrayToString(value: string[], shouldAddSingleQuote = tru
     return result;
 }
 
-export function createSetterForArray(value: string[], valueKey: string) {
+export function createSetterForDirective(dirBinding: { value: any[], params: any[] }, ctx: string) {
     let string = "";
-    value.forEach((val, index) => {
+    const valueKey: string = "values";
+    dirBinding.value.forEach((val, index) => {
         if (stringRegex.test(val) === false && comparisionOpRegex.test(val) === false) {
-            string += `${val} = ${valueKey}[${index}];`
+            if (val === dirBinding.params[index]) {
+                string += `${val} = ${valueKey}[${index}];`
+            }
+            else {
+                string += `${ctx}.setState('${val.replace(`${ctx}.`, '')}', ${valueKey}[${index}]);`
+            }
+            // console.log('val', val, string);
+
         }
     });
+    // console.log('valstring', string);
+
     return string;
 }

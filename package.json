@@ -1,21 +1,21 @@
 {
   "name": "mahal-html-compiler",
   "displayName": "mahal-html-compiler",
-  "version": "0.18.0",
+  "version": "1.1.0",
   "description": "Html compiler for mahal framework",
   "main": "dist/npm.export.js",
   "types": "dist/ts/index.d.ts",
   "scripts": {
     "build:grammar": "node build_helper/grammar.js",
     "start": "npm run dev",
-    "test:mahal": "cd ../mahal && npm run pack:test",
+    "test:mahal": "cd ../mahal && npm run install:compiler && npm run pack:test",
     "test": "cd test && npm run install:test",
     "build": "npm run build:grammar && npm run webpack:dev",
-    "build:pack": "npm run build && npm run webpack:test && npm pack",
+    "build:pack": "npm run build && npm pack",
     "webpack:dev": "webpack --config webpack/webpack.config.dev.js",
     "webpack:test": "webpack --config webpack/webpack.config.test.js",
     "build:test": "npm run build:pack && npm run test",
-    "deploy": "npm run build:test && npm run test:mahal",
+    "deploy": "npm run build:test && npm run webpack:test && npm run test:mahal",
     "install:self": "npm i mahal-html-compiler-0.5.0.tgz --no-save",
     "debug": "npm run build:pack && cd test && npm run install:debug"
   },
@@ -23,7 +23,7 @@
     "type": "git",
     "url": "git+https://github.com/ujjwalguptaofficial/mahal-html-compiler.git"
   },
-  "author": "Ujjwal Gupta",
+  "author": "Ujjwal Gupta <https://ujjwalguptaofficial.github.io/>",
   "license": "APACHE 2.0",
   "bugs": {
     "url": "https://github.com/ujjwalguptaofficial/mahal-html-compiler/issues"

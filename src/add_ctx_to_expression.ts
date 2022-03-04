@@ -1,4 +1,4 @@
-import { stringRegex, jsKeywordRegex, contextString } from "./constant";
+import { stringRegex, jsKeywordRegex, CONTEXT_STRING } from "./constant";
 
 export interface IExpression {
     expStr: string;
@@ -7,7 +7,7 @@ export interface IExpression {
 }
 
 function replaceWithContext(value: string) {
-    return value.replace(jsKeywordRegex, `${contextString}.$1`)
+    return value.replace(jsKeywordRegex, `${CONTEXT_STRING}.$1`)
 }
 
 // export function addCtxToExpression(expressions: IExpression[]) {
