@@ -1,8 +1,9 @@
 # mahal-html-compiler
 
+official Html compiler for mahal framework
 
+# Install
 
-# todo
-* support for "-" in component name - done
-* support for header (h1,h2)
-* support for numbers
+```
+npm i mahal-html-compiler
+```

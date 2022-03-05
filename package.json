@@ -17,7 +17,8 @@
     "build:test": "npm run build:pack && npm run test",
     "deploy": "npm run build:test && npm run test:mahal",
     "install:self": "npm i mahal-html-compiler-0.5.0.tgz --no-save",
-    "debug": "npm run build:pack && cd test && npm run install:debug"
+    "debug": "npm run build:pack && cd test && npm run install:debug",
+    "prepublishOnly": "npm run deploy"
   },
   "repository": {
     "type": "git",
