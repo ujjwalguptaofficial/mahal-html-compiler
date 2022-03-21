@@ -67,7 +67,8 @@ HtmlTagClosing = openTag:HtmlOpen GtSymbol child:(HtmlTag/Html/MustacheExpressio
 
 HtmlTagSelfClosing = openTag:HtmlOpen "/" GtSymbol {
   return {
-    view:openTag
+    view:openTag,
+    child:[]
   }
 }
 

@@ -2,14 +2,8 @@ const { createRenderer } = require("mahal-html-compiler");
 
 try {
 	var fn = createRenderer(`
-    <div>
-    <div class="fruit-row" :for(fruit,i in fruits)>
-        <input type="text" :model(fruit) />
-        <span>{{fruit}}</span>
-        <button on:click="()=>{updateFruit(fruit,i)}">Update</button>
-    </div>
-</div>
-`, 'dd');
+	<div><div :for(fruit in fruits) :fruit="fruit" /></div>
+`);
 
 	console.log(fn.toString());
 } catch (error) {

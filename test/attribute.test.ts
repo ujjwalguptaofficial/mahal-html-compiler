@@ -3,7 +3,7 @@ import { createRenderer } from "../src/index";
 import { createComponent } from "./create_component";
 import { mount } from "mahal-test-utils";
 
-describe('Comment', function () {
+describe('Attribute', function () {
     it('with simple ', () => {
         createRenderer(`
         <div :name='ujjwal'></div>
@@ -109,5 +109,34 @@ describe('Comment', function () {
         const component = await mount(compClass);
         const btn = component.element;
         expect(btn.tagName).equal('DIV')
+    })
+
+    it('array with prop using for', async () => {
+        const html = `<div><div class="fruit" :for(item in fruits) :fruit="item">{{item}}</div></div>`
+
+        const compClass = createComponent(`
+    ${html}
+         `)
+
+        const component = await mount(compClass);
+        const fruits = component.element.querySelectorAll('.fruit')
+        component.getState('fruits').forEach((fruit, index) => {
+            expect(fruit).equal(fruits[index].innerHTML);
+            expect(fruit).equal(fruits[index].getAttribute('fruit'));
+        })
+    })
+
+    it('array with prop using for self closing', async () => {
+        const html = `<div><div class="fruit" :for(item in fruits) :fruit="item"/></div>`
+
+        const compClass = createComponent(`
+    ${html}
+         `)
+
+        const component = await mount(compClass);
+        const fruits = component.element.querySelectorAll('.fruit')
+        component.getState('fruits').forEach((fruit, index) => {
+            expect(fruit).equal(fruits[index].getAttribute('fruit'));
+        })
     })
 })

@@ -8,6 +8,7 @@ export function createComponent(template: string, scoped?) {
         render = result as any;
 
         name = 'ujjwal gupta'
+        fruits = ['apple', 'mango']
     }
 
     return MyComponent;

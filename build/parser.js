@@ -179,7 +179,8 @@ function peg$parse(input, options) {
       peg$c12 = peg$literalExpectation("/", false),
       peg$c13 = function(openTag) {
         return {
-          view:openTag
+          view:openTag,
+          child:[]
         }
       },
       peg$c14 = function(word, option) {
