@@ -249,4 +249,18 @@ describe('simple', function () {
         expect(btn.textContent).equal(removingSpaceAndNewLine);
     })
 
+    it('fragment test', async () => {
+        const html = `<div class="column center container">
+       <>fff</>
+    </div>`
+
+        const compClass = createComponent(`
+    ${html}
+         `)
+
+        const component = await mount(compClass);
+        const el = component.element;
+        expect(el.innerHTML).equal('fff')
+    })
+
 })

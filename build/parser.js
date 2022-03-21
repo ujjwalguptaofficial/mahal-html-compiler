@@ -163,7 +163,6 @@ function peg$parse(input, options) {
        return word.join('')
       },
       peg$c10 = function(openTag, child, closeTag) {
-       
        const openTagValue = openTag.tag;
        if (openTagValue != closeTag) {
               error("Expected </" + openTagValue + "> but </" + closeTag + "> found.");
@@ -867,7 +866,7 @@ function peg$parse(input, options) {
     var s0, s1, s2, s3;
 
     s0 = peg$currPos;
-    s1 = peg$parseHtmlOpen();
+    s1 = peg$parseHtmlOpenSelfClosing();
     if (s1 !== peg$FAILED) {
       if (input.charCodeAt(peg$currPos) === 47) {
         s2 = peg$c11;
@@ -881,6 +880,40 @@ function peg$parse(input, options) {
         if (s3 !== peg$FAILED) {
           peg$savedPos = s0;
           s1 = peg$c13(s1);
+          s0 = s1;
+        } else {
+          peg$currPos = s0;
+          s0 = peg$FAILED;
+        }
+      } else {
+        peg$currPos = s0;
+        s0 = peg$FAILED;
+      }
+    } else {
+      peg$currPos = s0;
+      s0 = peg$FAILED;
+    }
+
+    return s0;
+  }
+
+  function peg$parseHtmlOpenSelfClosing() {
+    var s0, s1, s2, s3, s4;
+
+    s0 = peg$currPos;
+    s1 = peg$parseLtSymbol();
+    if (s1 !== peg$FAILED) {
+      s2 = peg$parseXmlTag();
+      if (s2 !== peg$FAILED) {
+        s3 = [];
+        s4 = peg$parseHtmlOpenOption();
+        while (s4 !== peg$FAILED) {
+          s3.push(s4);
+          s4 = peg$parseHtmlOpenOption();
+        }
+        if (s3 !== peg$FAILED) {
+          peg$savedPos = s0;
+          s1 = peg$c14(s2, s3);
           s0 = s1;
         } else {
           peg$currPos = s0;

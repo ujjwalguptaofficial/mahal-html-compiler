@@ -52,7 +52,6 @@ CommentContent "comment content" = word: (!"-->" c:. {return c})* {
 
 
 HtmlTagClosing = openTag:HtmlOpen GtSymbol child:(HtmlTag/Html/MustacheExpression)* closeTag:CloseTag {
- 
  const openTagValue = openTag.tag;
  if (openTagValue != closeTag) {
         error("Expected </" + openTagValue + "> but </" + closeTag + "> found.");
@@ -65,11 +64,15 @@ HtmlTagClosing = openTag:HtmlOpen GtSymbol child:(HtmlTag/Html/MustacheExpressio
   }
 }
 
-HtmlTagSelfClosing = openTag:HtmlOpen "/" GtSymbol {
+HtmlTagSelfClosing = openTag:HtmlOpenSelfClosing "/" GtSymbol {
   return {
     view:openTag,
     child:[]
   }
+}
+
+HtmlOpenSelfClosing = LtSymbol word: XmlTag  option:(HtmlOpenOption)* {
+ return handleHtmlOpen(word,option);
 }
 
 HtmlOpen = LtSymbol word: XmlTag?  option:(HtmlOpenOption)* {
