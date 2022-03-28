@@ -62,4 +62,12 @@ describe('If', function () {
      </div>
         `)
     })
+
+    it('if with !', () => {
+        createRenderer(`<div>
+        <div :if(!cond1)></div>
+        <div :else-if(!'cond2')></div>
+        </div>
+        `)
+    })
 })

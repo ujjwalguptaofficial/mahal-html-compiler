@@ -219,9 +219,10 @@ EventHandlerWithPipe = _* "|" _* ev: EventHandler{
   return ev;
 }
 
-EventHandler = StringSymbol handler:EventAssignment StringSymbol {
+EventHandler = handler:EventAssignment {
   return handler
 }
+
 
 EventModifier "event modifier" = "."  value:Identifier {
   return value;
@@ -242,7 +243,7 @@ ExpressionValue = val : AnyValue {
     return val;
   }
   if(val.__isProp__){
-    return {keys:[val.value], raw: val.value, expStr: "ctx." + val.value}
+    return {keys:[val.pre + val.value], raw: val.pre + val.value, expStr: val.pre + "ctx." + val.value}
   }
   return {keys:[],raw:val,expStr:val}
 }
@@ -288,9 +289,23 @@ ExpWord "expression" = val:[a-zA-Z0-9\.\$\-\'\"]+ {
 	return val.join("");
 }
 
-EventAssignment "Event Assignment"= val:[a-zA-Z0-9\&\=\>\{\}\(\)\ \|\[\]\,\.]+ {
+EventAssignment "Event Assignment"= val:(EventAssignment1/EventAssignment2) {
+  const openPar = val.match(/[(]/g);
+  if(openPar && !val.match(/=>/g)){
+   return `()=> ${val}`;
+  }
+  return val;
+}
+
+EventAssignment1 = '"' val:(!'"' c:. {return c})+ '"' {
 	return val.join("");
 }
+
+EventAssignment2 = "'" val:(!"'" c:. {return c})+ "'" {
+	return val.join("");
+}
+
+
 
 /*Html "html"= val: [^<>{}]+ {
 	return val.join("").replace(/[\n\r]/gm, "").replace(/\s\s+/g, ' ');
@@ -356,14 +371,15 @@ Everything = val: (c:. {return c})*{
   return val.join('')
 }
 
-String "string" = StringSymbol val:(!"'" !'"' c:. {return c})+ StringSymbol {
-   return `'${val.join("")}'`;
+String "string" = pre:"!"? StringSymbol val:(!"'" !'"' c:. {return c})+ StringSymbol {
+   return `'${pre||''}${val.join("")}'`;
 }
 
-Prop "prop" = val:Identifier {
+Prop "prop" = pre:"!"? val:Identifier {
   return {
     __isProp__:true,
-    value:val
+    value: val,
+    pre: pre||''
   }
 }
 
