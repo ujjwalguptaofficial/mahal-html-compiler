@@ -248,7 +248,7 @@ ExpressionValue = val : AnyValue _*{
   return {keys:[],raw:val,expStr:val}
 }
 
-ExpressionRightSide = op:Operator _* val:ExpressionValue {
+ExpressionRightSide = op:ComparisionAndArithmeticOperator _* val:ExpressionValue {
  return {op,val}
 }
 
@@ -281,7 +281,7 @@ Connector = val:([&]/"||"/"+"/"-"/"*")+ {
   return val.join("");
 }
 
-Operator = val:[>\=\<\!\+\-\*\/\\]+ {
+ComparisionAndArithmeticOperator "comparision operator or arithmetic operator" = val:[>\=\<\!\+\-\*\/\\]+ {
   return val.join("");
 }
 
@@ -375,10 +375,15 @@ String "string" = pre:"!"? StringSymbol val:(!"'" !'"' c:. {return c})+ StringSy
    return `'${pre||''}${val.join("")}'`;
 }
 
-Prop "prop" = pre:"!"? val:Identifier {
+ArrayPropPart = "[" val:(PrimitiveValue) "]" {
+ if(val.__isProp__) return error("Component prop are not supported in html, please use Computed.");
+ return "[" + val + "]";
+}
+
+Prop "prop" = pre:"!"? val:Identifier arrayProps:ArrayPropPart* {
   return {
     __isProp__:true,
-    value: val,
+    value: val + arrayProps.join(""),
     pre: pre||''
   }
 }
