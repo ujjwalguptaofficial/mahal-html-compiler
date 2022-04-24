@@ -95,4 +95,16 @@ describe('If', function () {
         </div>
         `)
     })
+
+    it('if with array prop with component prop', () => {
+        try {
+            createRenderer(`<div>
+        <div :if(item[a])></div>
+        </div>
+        `)
+            throw new Error('should have been error')
+        } catch (error) {
+            expect(error.message).equal('Component prop are not supported in html, please use Computed.')
+        }
+    })
 })
