@@ -70,4 +70,12 @@ describe('If', function () {
         </div>
         `)
     })
+
+    it('if with >', () => {
+        createRenderer(`<div>
+        <div :if(item.length > 0)></div>
+        <div :else-if(!item.length < 0)></div>
+        </div>
+        `)
+    })
 })

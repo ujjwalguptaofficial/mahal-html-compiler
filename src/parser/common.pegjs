@@ -238,7 +238,7 @@ Expression = exp1:SingleExpression expn:MultipleExpression* {
    return exp1;
 }
 
-ExpressionValue = val : AnyValue {
+ExpressionValue = val : AnyValue _*{
   if(val.expStr){
     return val;
   }
@@ -248,7 +248,7 @@ ExpressionValue = val : AnyValue {
   return {keys:[],raw:val,expStr:val}
 }
 
-ExpressionRightSide = op:Operator val:ExpressionValue {
+ExpressionRightSide = op:Operator _* val:ExpressionValue {
  return {op,val}
 }
 
