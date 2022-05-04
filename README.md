@@ -1,6 +1,6 @@
 # mahal-html-compiler
 
-official Html compiler for mahal framework
+official Html compiler for [mahal framework](https://github.com/ujjwalguptaofficial/mahal)
 
 # Install
 
