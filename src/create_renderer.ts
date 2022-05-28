@@ -185,7 +185,7 @@ export function createRenderer(template: string, moduleId?: string) {
             }
 
             const handleOption = () => {
-                let optionStr = ",{";
+                let optionStr = "{";
 
                 // handle event
                 const eventLength = compiled.view.events.length;
@@ -312,18 +312,23 @@ export function createRenderer(template: string, moduleId?: string) {
                     optionStr += `${optionStr.length > 2 ? "," : ''} attr:{${attrString}}`;
                 }
 
-                optionStr += "})";
+                optionStr += "}";
                 return optionStr;
             }
 
-            const handleFor = (value: string) => {
+            const addTagAndOption = (tagStr, optionStr) => {
+                return tagStr + "," + optionStr + ")";
+            };
+
+            const handleFor = (tagStr, optionStr) => {
                 let forExp = compiled.view.forExp;
                 const { keys } = forExp.value;
                 // const getRegex = (subStr) => {
                 //     return new RegExp(subStr, 'g');
                 // }
-                return `...he((${forExp.key},${forExp.index})=>{
-                            return ${value} 
+                return `...he((${forExp.key},${forExp.index}, returnKey)=>{
+                            const option = ${optionStr};
+                            return returnKey ? option.attr?.key?.v: ${tagStr + ','} option )
                     
                         },${convertArrayToString(keys)},'for')
                 `
@@ -335,7 +340,7 @@ export function createRenderer(template: string, moduleId?: string) {
                 (() => {
                     const { expStr, keys } = ifModified.ifExp;
                     allKeys = allKeys.concat(keys);
-                    str += `he(()=>{return ${expStr} ? ${handleTag() + handleOption()}`
+                    str += `he(()=>{return ${expStr} ? ${addTagAndOption(handleTag(), handleOption())}`
                 })();
                 ifModified.ifElseList.forEach(item => {
                     const { expStr, keys } = item.view.ifExp.elseIfCond;
@@ -355,10 +360,13 @@ export function createRenderer(template: string, moduleId?: string) {
             }
             else {
                 if (compiled.view.forExp) {
-                    str += handleFor(handleTag() + handleOption())
+                    const tagStr = handleTag();
+                    const op = handleOption();
+                    console.log('option str', op);
+                    str += handleFor(tagStr, op);
                 }
                 else {
-                    str += handleTag() + handleOption()
+                    str += addTagAndOption(handleTag(), handleOption());
                 }
             }
         }
