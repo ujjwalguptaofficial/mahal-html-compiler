@@ -328,7 +328,11 @@ export function createRenderer(template: string, moduleId?: string) {
                 // }
                 return `...he((${forExp.key},${forExp.index}, returnKey)=>{
                             const option = ${optionStr};
-                            return returnKey ? option.attr?.key?.v: ${tagStr + ','} option )
+                            option.attr = option.attr || {};
+                            option.attr.key = option.attr.key || {};
+                            option.attr.key.v = option.attr.key.v || ${forExp.index};
+                           
+                            return returnKey ? option.attr.key.v : ${tagStr + ','} option )
                     
                         },${convertArrayToString(keys)},'for')
                 `
@@ -362,7 +366,6 @@ export function createRenderer(template: string, moduleId?: string) {
                 if (compiled.view.forExp) {
                     const tagStr = handleTag();
                     const op = handleOption();
-                    console.log('option str', op);
                     str += handleFor(tagStr, op);
                 }
                 else {
