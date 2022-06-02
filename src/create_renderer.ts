@@ -328,11 +328,7 @@ export function createRenderer(template: string, moduleId?: string) {
                 // }
                 return `...he((${forExp.key},${forExp.index}, returnKey)=>{
                             const option = ${optionStr};
-                            option.attr = option.attr || {};
-                            option.attr.key = option.attr.key || {};
-                            option.attr.key.v = option.attr.key.v || ${forExp.index};
-                           
-                            return returnKey ? option.attr.key.v : ${tagStr + ','} option )
+                            return returnKey ? option.attr?.key?.v || ${forExp.index} : ${tagStr + ','} option )
                     
                         },${convertArrayToString(keys)},'for')
                 `
