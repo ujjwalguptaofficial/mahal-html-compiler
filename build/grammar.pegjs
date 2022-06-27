@@ -143,7 +143,7 @@ Else= ":else"{
 
 For = ":for("_* key:Identifier _* index:ForIndex?  _* "in" _* value:Expression _* ")"{
    return {forExp:{
-      key, value,index : index || 'i'
+      key, value,index : index || '__i__'
    }}
 }
 

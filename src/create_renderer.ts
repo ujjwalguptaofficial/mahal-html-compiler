@@ -193,7 +193,7 @@ export function createRenderer(template: string, moduleId?: string) {
                     let eventStr = "";
                     // const identifierRegex = /([a-zA-Z]+)/g
                     // const identifierRegex = /\b(?!(?:false\b))([\w]+)/g
-                    const identifierRegex = /\b(?!(?:false|true\b))([a-zA-Z]+)/g
+                    const identifierRegex = /\b(?!(?:false|true\b))([a-zA-Z.]+)/g
                     compiled.view.events.forEach((ev, index) => {
                         let handlerStr = "[";
                         ev.handlers.forEach(item => {

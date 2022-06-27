@@ -1,4 +1,9 @@
+import { expect } from "chai";
+import { mount } from "mahal-test-utils";
 import { createRenderer } from "../src/index";
+import { createComponent } from "./create_component";
+import { createSandbox } from "sinon";
+import { nextTick } from "mahal";
 
 describe('For loop', function () {
     it('simple', () => {
@@ -53,5 +58,25 @@ describe('For loop', function () {
            </tr>
         </table>
         `)
+    })
+
+    it('for with i as index', async () => {
+        const compClass = createComponent(`<div>
+          <div :for(student in students)>
+          <button @click="logText(student.id)">{{student.id}}</button>
+      </div>
+          </div>
+        `)
+
+        const component = await mount(compClass);
+
+        const btn = component.element.querySelector('button');
+        expect(btn.textContent).equal('1');
+        let sandbox = createSandbox();
+        sandbox.stub(console, "log");
+        btn.click();
+        await nextTick();
+        sandbox.assert.calledOnceWithExactly(console.log, 1);
+        sandbox.restore();
     })
 })

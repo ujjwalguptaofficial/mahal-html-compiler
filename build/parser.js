@@ -267,7 +267,7 @@ function peg$parse(input, options) {
       peg$c61 = peg$literalExpectation("in", false),
       peg$c62 = function(key, index, value) {
          return {forExp:{
-            key, value,index : index || 'i'
+            key, value,index : index || '__i__'
          }}
       },
       peg$c63 = function(attr, word) {

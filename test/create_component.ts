@@ -9,6 +9,14 @@ export function createComponent(template: string, scoped?) {
 
         name = 'ujjwal gupta'
         fruits = ['apple', 'mango']
+        students = [{
+            id: 1,
+            name: 'd'
+        }]
+
+        logText(data) {
+            console.log(data);
+        }
     }
 
     return MyComponent;
