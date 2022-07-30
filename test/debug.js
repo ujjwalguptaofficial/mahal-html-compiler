@@ -2,7 +2,7 @@ const { createRenderer } = require("mahal-html-compiler");
 
 try {
 	var fn = createRenderer(`
-	<div><div :for(fruit in fruits) /></div>
+	<div><div :for(fruit in fruits) >{{fruit.id}}</div></div>
 `);
 
 	console.log(fn.toString());

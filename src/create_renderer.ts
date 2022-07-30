@@ -97,13 +97,15 @@ export function createRenderer(template: string, moduleId?: string) {
     const ct = renderer.createTextNode;
     const f = renderer.format;
     const he = renderer.runExp;
+    const addRc_ = renderer.addRc;
     `;
-    const createJsEqFromCompiled = (compiled: ICompiledView) => {
+    const createJsEqFromCompiled = (compiled: ICompiledView, dependent?: string) => {
         let str = "";
         if (compiled.view) {
-            const handleTag = () => {
+            const handleTag = (type?: string) => {
                 const htmlTag = compiled.view.tag;
                 let tagHtml = htmlTag == null ? `ce(null,` : `ce('${htmlTag}',`
+
                 if (compiled.child) {
                     let ifModifiedExpression: IIfExpModified;
                     let indexOfIfCond;
@@ -170,8 +172,18 @@ export function createRenderer(template: string, moduleId?: string) {
 
                     var child = "["
                     compiled.child.forEach((item, index) => {
-                        const childCompiled = createJsEqFromCompiled(item);
+                        let childCompiled = createJsEqFromCompiled(item, type);
                         if (childCompiled && childCompiled.trim().length > 0) {
+                            // const forExp = compiled.view.forExp;
+                            // if (forExp) {
+                            //     childCompiled = `(()=>{
+                            //         const dep = {};
+                            //         const _el_ = ${childCompiled};
+                            //         _el_._reactiveChild_ = dep;
+                            //         return _el_; 
+                            //     })()
+                            //     `
+                            // }
                             child += `${childCompiled},`;
                         }
                     });
@@ -181,6 +193,7 @@ export function createRenderer(template: string, moduleId?: string) {
                 else {
                     tagHtml += "[]";
                 }
+
                 return tagHtml;
             }
 
@@ -277,7 +290,7 @@ export function createRenderer(template: string, moduleId?: string) {
                     });
                 }
                 const attrLength = attr.length;
-                if (attrLength > 0) {
+                if (attrLength > 0 || compiled.view.forExp) {
                     let attrString = '';
                     attr.forEach((item, index) => {
                         if (item.isExpression) {
@@ -326,56 +339,98 @@ export function createRenderer(template: string, moduleId?: string) {
                 // const getRegex = (subStr) => {
                 //     return new RegExp(subStr, 'g');
                 // }
-                return `...he((${forExp.key},${forExp.index}, returnKey)=>{
-                            const option = ${optionStr};
-                            option.attr = option.attr || {};
-                            if(!option.attr.key) {
-                                option.attr.key=   {v :  ${forExp.index}}
+                const method = `(${forExp.key},${forExp.index}, returnKey)=>{
+                    const option = ${optionStr};
+                    const attr = option.attr;
+                    if(!attr.key) {
+                        attr.key=   {v :  ${forExp.index}}
+                    }
+                    return returnKey ? attr.key.v :  (()=>{ 
+                        const rc = {};
+                        const addRc=(key,el)=>{
+                            if(!rc[key]){
+                                rc[key] = [el];
                             }
-                            return returnKey ? option.attr.key.v : ${tagStr + ','} option )
-                    
-                        },${convertArrayToString(keys)},'for')
-                `
+                            else{
+                                rc[key].push(el);
+                            }
+                            return el;
+                        }
+                        const _el_ = ${tagStr + ','} option );
+                        // stands for reactive child
+                        _el_._rc_ = rc;
+                        return _el_; 
+                    })()
+            
+                }`;
+                return `...he(${method},${convertArrayToString(keys)},'for','${forExp.key}')`;
                 //return forStr;
             }
             const ifModified = compiled.view.ifExpModified;
             if (ifModified && ifModified.ifExp) {
                 let allKeys = [];
+                let method = '';
+                const depKeys = [];
+                const addDependency = (expStr: string) => {
+                    if (dependent && expStr.includes(dependent)) {
+                        const depKey = expStr.replace(
+                            new RegExp(dependent + '.', 'g'), ''
+                        );
+                        depKeys.push(depKey);
+                    }
+                }
                 (() => {
                     const { expStr, keys } = ifModified.ifExp;
                     allKeys = allKeys.concat(keys);
-                    str += `he(()=>{return ${expStr} ? ${addTagAndOption(handleTag(), handleOption())}`
+                    method += `()=>{return ${expStr} ? ${addTagAndOption(handleTag(dependent), handleOption())}`
+                    addDependency(expStr);
                 })();
                 ifModified.ifElseList.forEach(item => {
                     const { expStr, keys } = item.view.ifExp.elseIfCond;
                     allKeys = allKeys.concat(keys);
-                    str += `:${expStr} ? ${createJsEqFromCompiled(item)} `
+                    method += `:${expStr} ? ${createJsEqFromCompiled(item, dependent)} `
+                    addDependency(expStr);
                 });
 
                 let keysAsString = convertArrayToString(Array.from(new Set(allKeys)));
                 let elseString;
                 if (ifModified.else) {
-                    elseString = createJsEqFromCompiled(ifModified.else);
+                    elseString = createJsEqFromCompiled(ifModified.else, dependent);
                 }
                 else {
                     elseString = `ce()`;
                 }
-                str += `:${elseString} },${keysAsString})`
+                method += `:${elseString} }`
+                if (depKeys.length > 0) {
+                    let wrapperMethod = `()=>{ 
+                        const el = (${method})();
+                    `;
+                    depKeys.forEach(depKey => {
+                        wrapperMethod += `addRc('${depKey}', el)`;
+                    });
+                    wrapperMethod += `
+                        return el;
+                    } 
+                    `
+                    method = wrapperMethod;
+                }
+                str += `he(${method},${keysAsString})`
             }
             else {
-                if (compiled.view.forExp) {
-                    const tagStr = handleTag();
+                let forExp = compiled.view.forExp;
+                if (forExp) {
+                    const tagStr = handleTag(forExp.key);
                     const op = handleOption();
                     str += handleFor(tagStr, op);
                 }
                 else {
-                    str += addTagAndOption(handleTag(), handleOption());
+                    str += addTagAndOption(handleTag(dependent), handleOption());
                 }
             }
         }
         else if (compiled.mustacheExp) {
 
-            let method = `()=>{return ct(`;
+            let method = `()=>{  return ct(`;
             let brackets = "";
             compiled.filters.reverse().forEach(item => {
                 method += `f('${item}',`
@@ -383,7 +438,21 @@ export function createRenderer(template: string, moduleId?: string) {
             });
             handleLocalVar(compiled.localVars, compiled.mustacheExp);
             const { keys, expStr } = compiled.mustacheExp;
-            method += `${expStr} ${brackets} )}`;
+            method += `${expStr} ${brackets} )} `;
+            if (dependent) {
+                if (expStr.includes(dependent)) {
+
+                    const depKey = expStr.replace(
+                        new RegExp(dependent + '.', 'g'), ''
+                    );
+                    let wrapperMethod = `()=>{ 
+                        return addRc('${depKey}',(${method})());
+                    } 
+                    `
+                    method = wrapperMethod;
+                }
+            }
+
             str += `he(${method}, ${convertArrayToString(keys)})`
         }
         else if ((compiled as any).trim().length > 0) {
