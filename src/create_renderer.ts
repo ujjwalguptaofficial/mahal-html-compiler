@@ -347,15 +347,7 @@ export function createRenderer(template: string, moduleId?: string) {
                     }
                     return returnKey ? attr.key.v :  (()=>{ 
                         const rc = {};
-                        const addRc=(key,el)=>{
-                            if(!rc[key]){
-                                rc[key] = [el];
-                            }
-                            else{
-                                rc[key].push(el);
-                            }
-                            return el;
-                        }
+                        const addRc= addRc_.bind(rc);
                         const _el_ = ${tagStr + ','} option );
                         // stands for reactive child
                         _el_._rc_ = rc;
