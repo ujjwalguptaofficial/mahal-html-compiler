@@ -346,7 +346,7 @@ export function createRenderer(template: string, moduleId?: string) {
                         attr.key=   {v :  ${forExp.index}}
                     }
                     return returnKey ? attr.key.v :  (()=>{ 
-                        const rc = {};
+                        const rc = new Map();
                         const addRc= addRc_.bind(rc);
                         const _el_ = ${tagStr + ','} option );
                         // stands for reactive child
