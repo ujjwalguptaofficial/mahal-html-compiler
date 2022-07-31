@@ -220,12 +220,13 @@ export function createRenderer(template: string, moduleId?: string) {
                             handlerStr += exp.expStr;
                         });
                         handlerStr = removeCommaFromLast(handlerStr) + "]";
-                        eventStr += `${ev.name}: {
-                            handlers: ${handlerStr},
-                            isNative: ${ev.isNative},
-                            option: ${JSON.stringify(ev.option)},
-                            modifiers: ${convertArrayToString(ev.modifiers)}
-                        }`
+                        eventStr += `${ev.name}: ${handlerStr}`
+                        // eventStr += `${ev.name}: {
+                        //     handlers: ${handlerStr},
+                        //     isNative: ${ev.isNative},
+                        //     option: ${JSON.stringify(ev.option)},
+                        //     modifiers: ${convertArrayToString(ev.modifiers)}
+                        // }`
 
                         if (index + 1 < eventLength) {
                             eventStr += ","
