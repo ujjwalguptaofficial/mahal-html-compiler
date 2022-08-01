@@ -13,19 +13,18 @@ import { handleLocalVar } from "./handle_local_var";
 const CTX = CONTEXT_STRING;
 
 const replaceDependent = (expStr: string, dependent: string) => {
-    if (dependent) {
-        if (expStr.includes(dependent)) {
-            const depWithDot = dependent + '.';
-            if (expStr.includes(depWithDot)) {
-                return expStr.replace(
-                    new RegExp(depWithDot, 'g'), ''
-                );
-            }
+    if (dependent && expStr.includes(dependent)) {
+        const depWithDot = dependent + '.';
+        if (expStr.includes(depWithDot)) {
             return expStr.replace(
-                new RegExp(dependent, 'g'), ''
+                new RegExp(depWithDot, 'g'), ''
             );
         }
+        return expStr.replace(
+            new RegExp(dependent, 'g'), ''
+        );
     }
+    return;
 }
 
 export function createRenderer(template: string, moduleId?: string) {
@@ -381,8 +380,8 @@ export function createRenderer(template: string, moduleId?: string) {
                 let method = '';
                 const depKeys = [];
                 const addDependency = (expStr: string) => {
-                    if (dependent && expStr.includes(dependent)) {
-                        const depKey = replaceDependent(expStr, dependent);
+                    const depKey = replaceDependent(expStr, dependent);
+                    if (depKey != null) {
                         depKeys.push(depKey);
                     }
                 }
@@ -446,16 +445,13 @@ export function createRenderer(template: string, moduleId?: string) {
             handleLocalVar(compiled.localVars, compiled.mustacheExp);
             const { keys, expStr } = compiled.mustacheExp;
             method += `${expStr} ${brackets} )} `;
-            if (dependent) {
-                if (expStr.includes(dependent)) {
-
-                    const depKey = replaceDependent(expStr, dependent);
-                    let wrapperMethod = `()=>{ 
+            const depKey = replaceDependent(expStr, dependent);
+            if (depKey != null) {
+                let wrapperMethod = `()=>{ 
                         return addRc('${depKey}',(${method})());
                     } 
                     `
-                    method = wrapperMethod;
-                }
+                method = wrapperMethod;
             }
 
             str += `he(${method}, ${convertArrayToString(keys)})`
