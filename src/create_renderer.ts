@@ -12,6 +12,22 @@ import { handleLocalVar } from "./handle_local_var";
 
 const CTX = CONTEXT_STRING;
 
+const replaceDependent = (expStr: string, dependent: string) => {
+    if (dependent) {
+        if (expStr.includes(dependent)) {
+            const depWithDot = dependent + '.';
+            if (expStr.includes(depWithDot)) {
+                return expStr.replace(
+                    new RegExp(depWithDot, 'g'), ''
+                );
+            }
+            return expStr.replace(
+                new RegExp(dependent, 'g'), ''
+            );
+        }
+    }
+}
+
 export function createRenderer(template: string, moduleId?: string) {
     template = template.trim();
     let compiledParent: ICompiledView;
@@ -356,7 +372,7 @@ export function createRenderer(template: string, moduleId?: string) {
                     })()
             
                 }`;
-                return `...he(${method},${convertArrayToString(keys)},'for','${forExp.key}')`;
+                return `...he(${method},${convertArrayToString(keys)},'for')`;
                 //return forStr;
             }
             const ifModified = compiled.view.ifExpModified;
@@ -366,9 +382,7 @@ export function createRenderer(template: string, moduleId?: string) {
                 const depKeys = [];
                 const addDependency = (expStr: string) => {
                     if (dependent && expStr.includes(dependent)) {
-                        const depKey = expStr.replace(
-                            new RegExp(dependent + '.', 'g'), ''
-                        );
+                        const depKey = replaceDependent(expStr, dependent);
                         depKeys.push(depKey);
                     }
                 }
@@ -435,9 +449,7 @@ export function createRenderer(template: string, moduleId?: string) {
             if (dependent) {
                 if (expStr.includes(dependent)) {
 
-                    const depKey = expStr.replace(
-                        new RegExp(dependent + '.', 'g'), ''
-                    );
+                    const depKey = replaceDependent(expStr, dependent);
                     let wrapperMethod = `()=>{ 
                         return addRc('${depKey}',(${method})());
                     } 
