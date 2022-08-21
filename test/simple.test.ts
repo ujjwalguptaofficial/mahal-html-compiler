@@ -1,4 +1,4 @@
-import { createRenderer } from "mahal-html-compiler";
+import { createRenderer } from "@mahaljs/html-compiler";
 import { expect } from "chai";
 import { createComponent } from "./create_component";
 import { mount } from "mahal-test-utils";

@@ -75,7 +75,9 @@ describe('For loop', function () {
         let sandbox = createSandbox();
         sandbox.stub(console, "log");
         btn.click();
-        await nextTick();
+        await new Promise(res => {
+            nextTick(res);
+        })
         sandbox.assert.calledOnceWithExactly(console.log, 1);
         sandbox.restore();
     })

@@ -1,4 +1,4 @@
-const { createRenderer } = require("mahal-html-compiler");
+const { createRenderer } = require("@mahaljs/html-compiler");
 
 try {
 	var fn = createRenderer(`

@@ -5,5 +5,5 @@ official Html compiler for [mahal framework](https://github.com/ujjwalguptaoffic
 # Install
 
 ```
-npm i mahal-html-compiler
+npm i @mahaljs/html-compiler
 ```
