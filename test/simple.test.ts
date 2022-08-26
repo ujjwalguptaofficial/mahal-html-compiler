@@ -1,8 +1,7 @@
 import { createRenderer } from "@mahaljs/html-compiler";
 import { expect } from "chai";
 import { createComponent } from "./create_component";
-import { mount } from "mahal-test-utils";
-import { HTML_TAG } from "mahal";
+import { mount } from "@mahaljs/test-utils";
 
 
 describe('simple', function () {
@@ -161,7 +160,6 @@ describe('simple', function () {
     })
 
     it('Img tag', async () => {
-        HTML_TAG['img'] = true;
         const text = `
 			<img class="img-fluid img-profile rounded-circle mx-auto mb-2" src="img/profile.png" alt="profile" />
 
