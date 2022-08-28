@@ -11,3 +11,12 @@ official Html compiler for [mahal framework](https://github.com/ujjwalguptaoffic
 ```
 npm i @mahaljs/html-compiler
 ```
+
+# Doc
+  
+mahal-html-compiler exposes `createRenderer` method which takes html string as input and convert it to a method which is used by mahal.js to create the html element.
+
+```
+import { createRenderer } from "@mahaljs/html-compiler";
+const method = createRenderer(`<div>{{ujjwal}}</div>`);
+```
