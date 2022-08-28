@@ -27,7 +27,7 @@
     "debug": "npm run build:pack && cd test && npm run install:debug",
     "clean": "del dist",
     "prepublishOnly": "npm run deploy",
-    "build:ci": "npm run deploy"
+    "build:ci": "npm run build:test"
   },
   "repository": {
     "type": "git",
