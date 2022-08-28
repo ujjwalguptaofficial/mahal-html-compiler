@@ -26,7 +26,8 @@
     "install:self": "npm i mahal-html-compiler-0.5.0.tgz --no-save",
     "debug": "npm run build:pack && cd test && npm run install:debug",
     "clean": "del dist",
-    "prepublishOnly": "npm run deploy"
+    "prepublishOnly": "npm run deploy",
+    "build:ci": "npm run deploy"
   },
   "repository": {
     "type": "git",
