@@ -145,11 +145,13 @@ export function createRenderer(template: string, moduleId?: string) {
                         const forExpkey = forExp.key;
                         const forExpindex = forExp.index;
                         const forValue = forExp.value.raw;
-                        localVars.push(forExpkey, `${forExpkey}.`, `${forExpkey}[`, forExpindex, `${forValue}[${forExpindex}]`)
+                        localVars.push(forExpkey, `${forExpkey}.`, `${forExpkey}[`, forExpindex);
+                        localVars['forExp'] = forExp;
                     }
                     compiled.child.forEach((child, index) => {
                         if (typeof child === 'object') {
                             child.localVars = child.localVars ? child.localVars.concat(localVars) : localVars;
+                            child.localVars['forExp'] = localVars['forExp'];
                         }
                         if (!(child.view && child.view.ifExp)) {
                             return onIfCondEnd(index);

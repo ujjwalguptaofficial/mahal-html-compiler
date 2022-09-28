@@ -4,6 +4,12 @@ export interface IIfExpModified {
     ifElseList: ICompiledView[];
     else: ICompiledView;
 }
+
+export interface IForExp {
+    key: string;
+    value: IExpression;
+    index: string;
+}
 export interface ICompiledView {
     view: {
         tag: string,
@@ -13,11 +19,7 @@ export interface ICompiledView {
             elseIfCond: IExpression;
             else: boolean;
         },
-        forExp?: {
-            key: string;
-            value: IExpression;
-            index: string;
-        },
+        forExp?: IForExp,
         attr: {
             key: string,
             value: string | IExpression,

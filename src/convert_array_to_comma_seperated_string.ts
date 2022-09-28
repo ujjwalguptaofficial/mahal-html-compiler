@@ -5,9 +5,17 @@ import { IDirectiveBinding } from "./interface";
 export function convertArrayToString(value: string[], shouldAddSingleQuote = true) {
     let result = "[";
     value.forEach(val => {
-        result += (shouldAddSingleQuote === true ? (
-            stringRegex.test(val) === true ? val : `'${val}'`) :
-            val) + ","
+        if (typeof val === 'function') {
+            result += `( ${val} )()`
+        }
+        else {
+            result += (shouldAddSingleQuote === true ? (
+                stringRegex.test(val) === true ? val : `'${val}'`) :
+                val)
+        }
+
+        result += ",";
+
     })
     result = removeCommaFromLast(result);
     result += "]"
