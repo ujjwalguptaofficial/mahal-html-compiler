@@ -169,8 +169,19 @@ function peg$parse(input, options) {
         }
         return {
          view:openTag,
-         child: child.filter(item=> {
-            return item!=null && typeof item==='string'?item.trim().length!==0:true
+         child: child.filter((item,index)=> {
+            if(typeof item==='string'){
+               if(onlySpaces(item)){
+                  const nextChild = child[index+1];
+                  const prevChild = child[index-1];
+                  if(nextChild && prevChild){
+                   return nextChild.mustacheExp && prevChild.mustacheExp;
+                  }
+               }
+               return item.trim().length!==0; 
+            }
+            return true;
+            
          })
         }
       },
@@ -4288,6 +4299,9 @@ function peg$parse(input, options) {
 
 
    const CTX = "ctx";
+   function onlySpaces(str) {
+    return /^\s*$/.test(str);
+  }
    const handleHtmlOpen = (word,option)=>{
      const result = {
        tag:word || 'fragment',
