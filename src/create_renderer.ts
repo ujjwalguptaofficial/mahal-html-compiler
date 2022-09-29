@@ -140,7 +140,7 @@ export function createRenderer(template: string, moduleId?: string) {
                         indexOfIfCond = null;
                     }
                     const forExp = compiled.view.forExp;
-                    let localVars = compiled.localVars || [];
+                    const localVars = compiled.localVars || [];
                     if (forExp) {
                         const forExpkey = forExp.key;
                         const forExpindex = forExp.index;
@@ -150,8 +150,10 @@ export function createRenderer(template: string, moduleId?: string) {
                     }
                     compiled.child.forEach((child, index) => {
                         if (typeof child === 'object') {
-                            child.localVars = child.localVars ? child.localVars.concat(localVars) : localVars;
-                            child.localVars['forExp'] = localVars['forExp'];
+                            child.localVars = (child.localVars || []).concat(localVars);
+                            if (localVars['forExp']) {
+                                child.localVars['forExp'] = localVars['forExp'];
+                            }
                         }
                         if (!(child.view && child.view.ifExp)) {
                             return onIfCondEnd(index);
@@ -315,7 +317,13 @@ export function createRenderer(template: string, moduleId?: string) {
                             const val: IExpression = item.value as IExpression;
                             handleLocalVar(compiled.localVars, val);
                             const getKey = () => {
-                                return val.keys.length > 0 ? `'${val.keys[0]}'` : null
+                                const keys = val.keys;
+                                if (keys.length > 0) {
+                                    const firstKey = keys[0];
+                                    return typeof firstKey === 'function' ? `( ${firstKey} )()` : `'${firstKey}'`;
+                                }
+                                return null;
+
                             }
                             if (item.filters.length > 0) {
                                 let method = `()=>{return `;
@@ -369,6 +377,9 @@ export function createRenderer(template: string, moduleId?: string) {
                         const _el_ = ${tagStr + ','} option );
                         // stands for reactive child
                         _el_._rc_ = rc;
+                        _el_._setVal_ = (value)=>{
+                            ${forExp.key} = value; 
+                        }
                         return _el_; 
                     })()
             
@@ -445,16 +456,17 @@ export function createRenderer(template: string, moduleId?: string) {
                 brackets += ")"
             });
             handleLocalVar(compiled.localVars, compiled.mustacheExp);
-            const { keys, expStr } = compiled.mustacheExp;
+            let { keys, expStr } = compiled.mustacheExp;
+            expStr = typeof expStr === 'function' ? `(${expStr})()` : expStr;
             method += `${expStr} ${brackets} )} `;
-            const depKey = replaceDependent(expStr, dependent);
-            if (depKey != null) {
-                let wrapperMethod = `()=>{ 
-                        return addRc('${depKey}',(${method})());
-                    } 
-                    `
-                method = wrapperMethod;
-            }
+            // const depKey = replaceDependent(expStr, dependent);
+            // if (depKey != null) {
+            //     let wrapperMethod = `()=>{ 
+            //             return addRc('${depKey}',(${method})());
+            //         } 
+            //         `
+            //     method = wrapperMethod;
+            // }
 
             str += `he(${method}, ${convertArrayToString(keys)})`
         }
