@@ -14,7 +14,15 @@ export const handleLocalVar = (localVars: string[], exp: IExpression) => {
             const forExpkeyWithDot = forExp.key;//+ ".";
             const expKeys = exp.keys;
             const indexOfKey = expKeys.findIndex(q => {
-                return q.includes && q.includes(forExpkeyWithDot)
+                let indexOfForKey = q.indexOf && q.indexOf(forExpkeyWithDot);
+                if (indexOfForKey >= 0) {
+                    const nextChar = q[indexOfForKey + forExpkeyWithDot.length];
+                    if (nextChar && nextChar.match(alphabetRegex)) {
+                        return false;
+                    }
+                    return true;
+                }
+                return false;
             });
             if (indexOfKey >= 0) {
                 const foundExpKey = expKeys[indexOfKey];
