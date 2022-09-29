@@ -12,21 +12,6 @@ import { handleLocalVar } from "./handle_local_var";
 
 const CTX = CONTEXT_STRING;
 
-const replaceDependent = (expStr: string, dependent: string) => {
-    if (dependent && expStr.includes(dependent)) {
-        const depWithDot = dependent + '.';
-        if (expStr.includes(depWithDot)) {
-            return expStr.replace(
-                new RegExp(depWithDot, 'g'), ''
-            );
-        }
-        return expStr.replace(
-            new RegExp(dependent, 'g'), ''
-        );
-    }
-    return;
-}
-
 export function createRenderer(template: string, moduleId?: string) {
     template = template.trim();
     let compiledParent: ICompiledView;
@@ -112,7 +97,6 @@ export function createRenderer(template: string, moduleId?: string) {
     const ct = renderer.createTextNode;
     const f = renderer.format;
     const he = renderer.runExp;
-    const addRc_ = renderer.addRc;
     `;
     const createJsEqFromCompiled = (compiled: ICompiledView, dependent?: string) => {
         let str = "";
@@ -144,7 +128,6 @@ export function createRenderer(template: string, moduleId?: string) {
                     if (forExp) {
                         const forExpkey = forExp.key;
                         const forExpindex = forExp.index;
-                        const forValue = forExp.value.raw;
                         localVars.push(forExpkey, `${forExpkey}.`, `${forExpkey}[`, forExpindex);
                         localVars['forExp'] = forExp;
                     }
@@ -372,11 +355,7 @@ export function createRenderer(template: string, moduleId?: string) {
                         attr.key=   {v :  ${forExp.index}}
                     }
                     return returnKey ? attr.key.v :  (()=>{ 
-                        const rc = new Map();
-                        const addRc= addRc_.bind(rc);
                         const _el_ = ${tagStr + ','} option );
-                        // stands for reactive child
-                        _el_._rc_ = rc;
                         _el_._setVal_ = (value)=>{
                             ${forExp.key} = value; 
                         }
@@ -391,24 +370,16 @@ export function createRenderer(template: string, moduleId?: string) {
             if (ifModified && ifModified.ifExp) {
                 let allKeys = [];
                 let method = '';
-                const depKeys = [];
-                const addDependency = (expStr: string) => {
-                    const depKey = replaceDependent(expStr, dependent);
-                    if (depKey != null) {
-                        depKeys.push(depKey);
-                    }
-                }
+
                 (() => {
                     const { expStr, keys } = ifModified.ifExp;
                     allKeys = allKeys.concat(keys);
                     method += `()=>{return ${expStr} ? ${addTagAndOption(handleTag(dependent), handleOption())}`
-                    addDependency(expStr);
                 })();
                 ifModified.ifElseList.forEach(item => {
                     const { expStr, keys } = item.view.ifExp.elseIfCond;
                     allKeys = allKeys.concat(keys);
                     method += `:${expStr} ? ${createJsEqFromCompiled(item, dependent)} `
-                    addDependency(expStr);
                 });
 
                 let keysAsString = convertArrayToString(Array.from(new Set(allKeys)));
@@ -420,19 +391,6 @@ export function createRenderer(template: string, moduleId?: string) {
                     elseString = `ce()`;
                 }
                 method += `:${elseString} }`
-                if (depKeys.length > 0) {
-                    let wrapperMethod = `()=>{ 
-                        const el = (${method})();
-                    `;
-                    depKeys.forEach(depKey => {
-                        wrapperMethod += `addRc('${depKey}', el)`;
-                    });
-                    wrapperMethod += `
-                        return el;
-                    } 
-                    `
-                    method = wrapperMethod;
-                }
                 str += `he(${method},${keysAsString})`
             }
             else {
@@ -459,15 +417,6 @@ export function createRenderer(template: string, moduleId?: string) {
             let { keys, expStr } = compiled.mustacheExp;
             expStr = typeof expStr === 'function' ? `(${expStr})()` : expStr;
             method += `${expStr} ${brackets} )} `;
-            // const depKey = replaceDependent(expStr, dependent);
-            // if (depKey != null) {
-            //     let wrapperMethod = `()=>{ 
-            //             return addRc('${depKey}',(${method})());
-            //         } 
-            //         `
-            //     method = wrapperMethod;
-            // }
-
             str += `he(${method}, ${convertArrayToString(keys)})`
         }
         else if ((compiled as any).trim().length > 0) {
