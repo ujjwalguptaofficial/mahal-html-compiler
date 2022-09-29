@@ -12,6 +12,10 @@ import { handleLocalVar } from "./handle_local_var";
 
 const CTX = CONTEXT_STRING;
 
+function onlySpaces(str) {
+    return /^\s*$/.test(str);
+}
+
 export function createRenderer(template: string, moduleId?: string) {
     template = template.trim();
     let compiledParent: ICompiledView;
@@ -419,7 +423,7 @@ export function createRenderer(template: string, moduleId?: string) {
             method += `${expStr} ${brackets} )} `;
             str += `he(${method}, ${convertArrayToString(keys)})`
         }
-        else if ((compiled as any).trim().length > 0) {
+        else if (onlySpaces(compiled) || (compiled as any).trim().length > 0) {
             str += `ct(${JSON.stringify(compiled)})`;
         }
         return str;
