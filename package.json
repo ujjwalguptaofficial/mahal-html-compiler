@@ -40,7 +40,7 @@
   },
   "homepage": "https://github.com/ujjwalguptaofficial/mahal-html-compiler#readme",
   "devDependencies": {
-    "@mahaljs/test-utils": "^1.4.2",
+    "@mahaljs/test-utils": "^1.5.1",
     "@types/mocha": "^8.2.0",
     "chai": "^4.3.0",
     "copy-webpack-plugin": "^6.1.1",

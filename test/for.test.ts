@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { mount } from "mahal-test-utils";
+import { mount } from "@mahaljs/test-utils";
 import { createRenderer } from "../src/index";
 import { createComponent } from "./create_component";
 import { createSandbox } from "sinon";

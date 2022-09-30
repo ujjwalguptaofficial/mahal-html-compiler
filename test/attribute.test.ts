@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { createRenderer } from "../src/index";
 import { createComponent } from "./create_component";
-import { mount } from "mahal-test-utils";
+import { mount } from "@mahaljs/test-utils";
 
 describe('Attribute', function () {
     it('with simple ', () => {
