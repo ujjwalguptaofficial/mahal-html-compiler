@@ -13,3 +13,4 @@ export * from "./set_attribute";
 export * from "./for_own";
 export * from "./is_true";
 export * from "./is_key_exist";
+export * from "./is_only_spaces";

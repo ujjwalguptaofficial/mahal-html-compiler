@@ -1,5 +1,5 @@
 import { parseview } from "./parse_view";
-import { LogHelper } from "./utils";
+import { LogHelper, isOnlySpaces } from "./utils";
 import { ERROR_TYPE } from "./enums";
 import { CONTEXT_STRING } from "./constant";
 import { ICompiledView, IIfExpModified } from "./interface";
@@ -11,10 +11,6 @@ import { EOL } from "os";
 import { handleLocalVar } from "./handle_local_var";
 
 const CTX = CONTEXT_STRING;
-
-function onlySpaces(str) {
-    return /^\s*$/.test(str);
-}
 
 export function createRenderer(template: string, moduleId?: string) {
     template = template.trim();
@@ -307,7 +303,8 @@ export function createRenderer(template: string, moduleId?: string) {
                                 const keys = val.keys;
                                 if (keys.length > 0) {
                                     const firstKey = keys[0];
-                                    return typeof firstKey === 'function' ? `( ${firstKey} )()` : `'${firstKey}'`;
+                                    return firstKey[0].match(/['|"]/) ? firstKey : `'${firstKey}'`;
+                                    // return firstKey; typeof firstKey === 'function' ? `( ${firstKey} )()` : `'${firstKey}'`;
                                 }
                                 return null;
 
@@ -423,7 +420,7 @@ export function createRenderer(template: string, moduleId?: string) {
             method += `${expStr} ${brackets} )} `;
             str += `he(${method}, ${convertArrayToString(keys)})`
         }
-        else if (onlySpaces(compiled) || (compiled as any).trim().length > 0) {
+        else if (isOnlySpaces(compiled) || (compiled as any).trim().length > 0) {
             str += `ct(${JSON.stringify(compiled)})`;
         }
         return str;

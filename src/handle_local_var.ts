@@ -28,9 +28,8 @@ export const handleLocalVar = (localVars: string[], exp: IExpression) => {
                 const foundExpKey = expKeys[indexOfKey];
                 const splittedKey = foundExpKey.split('.');
                 const lastStr = splittedKey.length > 1 ? '.' + splittedKey.slice(1).join('.') : '';
-                (expKeys[indexOfKey] as any) = eval(`() => 
-                '${forExp.value.raw}.'+${forExp.index}` + (lastStr.length > 0 ? `+'${lastStr}'` : '')
-                );
+                (expKeys[indexOfKey] as any) = `'${forExp.value.raw}.'+${forExp.index}` + (lastStr.length > 0 ? `+'${lastStr}'` : '')
+                    ;
             }
 
             // if (typeof expStr === 'string') {
