@@ -1,5 +1,5 @@
 import { parseview } from "./parse_view";
-import { LogHelper, isOnlySpaces } from "./utils";
+import { getObjectLength, isOnlySpaces, LogHelper } from "./utils";
 import { ERROR_TYPE } from "./enums";
 import { CONTEXT_STRING } from "./constant";
 import { ICompiledView, IIfExpModified } from "./interface";
@@ -11,6 +11,21 @@ import { EOL } from "os";
 import { handleLocalVar } from "./handle_local_var";
 
 const CTX = CONTEXT_STRING;
+
+const replaceDependent = (expStr: string, dependent: string) => {
+    if (dependent && expStr.includes(dependent)) {
+        const depWithDot = dependent + '.';
+        if (expStr.includes(depWithDot)) {
+            return expStr.replace(
+                new RegExp(depWithDot, 'g'), ''
+            );
+        }
+        return expStr.replace(
+            new RegExp(dependent, 'g'), ''
+        );
+    }
+    return;
+}
 
 export function createRenderer(template: string, moduleId?: string) {
     template = template.trim();
@@ -97,6 +112,7 @@ export function createRenderer(template: string, moduleId?: string) {
     const ct = renderer.createTextNode;
     const f = renderer.format;
     const he = renderer.runExp;
+    const addRc_ = renderer.addRc;
     `;
     const createJsEqFromCompiled = (compiled: ICompiledView, dependent?: string) => {
         let str = "";
@@ -124,19 +140,16 @@ export function createRenderer(template: string, moduleId?: string) {
                         indexOfIfCond = null;
                     }
                     const forExp = compiled.view.forExp;
-                    const localVars = compiled.localVars || [];
+                    let localVars = compiled.localVars || [];
                     if (forExp) {
                         const forExpkey = forExp.key;
                         const forExpindex = forExp.index;
-                        localVars.push(forExpkey, `${forExpkey}.`, `${forExpkey}[`, forExpindex);
-                        localVars['forExp'] = forExp;
+                        const forValue = forExp.value.raw;
+                        localVars.push(forExpkey, `${forExpkey}.`, `${forExpkey}[`, forExpindex, `${forValue}[${forExpindex}]`)
                     }
                     compiled.child.forEach((child, index) => {
                         if (typeof child === 'object') {
                             child.localVars = (child.localVars || []).concat(localVars);
-                            if (localVars['forExp']) {
-                                child.localVars['forExp'] = localVars['forExp'];
-                            }
                         }
                         if (!(child.view && child.view.ifExp)) {
                             return onIfCondEnd(index);
@@ -199,9 +212,9 @@ export function createRenderer(template: string, moduleId?: string) {
                 return tagHtml;
             }
 
-            const handleOption = () => {
+            const handleOption = (type?: string) => {
                 let optionStr = "{";
-
+                const rc = {};
                 // handle event
                 const eventLength = compiled.view.events.length;
                 if (eventLength > 0) {
@@ -257,6 +270,10 @@ export function createRenderer(template: string, moduleId?: string) {
                             // })
                             handleLocalVar(compiled.localVars, dirValue);
                             dirBinding.value.push(dirValue.expStr)
+                            const depKey = replaceDependent(dirValue.expStr, type);
+                            if (depKey != null) {
+                                rc[depKey] = 1;
+                            }
                             dirBinding.props = [...dirBinding.props, ...dirValue.keys]
                             dirBinding.params.push(dirValue.raw)
                         })
@@ -300,14 +317,7 @@ export function createRenderer(template: string, moduleId?: string) {
                             const val: IExpression = item.value as IExpression;
                             handleLocalVar(compiled.localVars, val);
                             const getKey = () => {
-                                const keys = val.keys;
-                                if (keys.length > 0) {
-                                    const firstKey = keys[0];
-                                    return firstKey[0].match(/['|"]/) ? firstKey : `'${firstKey}'`;
-                                    // return firstKey; typeof firstKey === 'function' ? `( ${firstKey} )()` : `'${firstKey}'`;
-                                }
-                                return null;
-
+                                return val.keys.length > 0 ? `'${val.keys[0]}'` : null
                             }
                             if (item.filters.length > 0) {
                                 let method = `()=>{return `;
@@ -335,6 +345,15 @@ export function createRenderer(template: string, moduleId?: string) {
                     optionStr += `${optionStr.length > 2 ? "," : ''} attr:{${attrString}}`;
                 }
 
+                if (getObjectLength(rc) != 0) {
+                    optionStr += `${optionStr.length > 2 ? "," : ''} rc:(el)=>{
+                       const rc = ${JSON.stringify(rc)};
+                       for(const key in rc){
+                          addRc(key,el)
+                       }
+                    }`;
+                }
+
                 optionStr += "}";
                 return optionStr;
             }
@@ -350,16 +369,18 @@ export function createRenderer(template: string, moduleId?: string) {
                 //     return new RegExp(subStr, 'g');
                 // }
                 const method = `(${forExp.key},${forExp.index}, returnKey)=>{
+                    let addRc;
                     const option = ${optionStr};
                     const attr = option.attr;
                     if(!attr.key) {
                         attr.key=   {v :  ${forExp.index}}
                     }
                     return returnKey ? attr.key.v :  (()=>{ 
+                        const rc = new Map();
+                        addRc= addRc_.bind(rc);
                         const _el_ = ${tagStr + ','} option );
-                        _el_._setVal_ = (value)=>{
-                            ${forExp.key} = value; 
-                        }
+                        // stands for reactive child
+                        _el_._rc_ = rc;
                         return _el_; 
                     })()
             
@@ -371,16 +392,24 @@ export function createRenderer(template: string, moduleId?: string) {
             if (ifModified && ifModified.ifExp) {
                 let allKeys = [];
                 let method = '';
-
+                const depKeys = [];
+                const addDependency = (expStr: string) => {
+                    const depKey = replaceDependent(expStr, dependent);
+                    if (depKey != null) {
+                        depKeys.push(depKey);
+                    }
+                }
                 (() => {
                     const { expStr, keys } = ifModified.ifExp;
                     allKeys = allKeys.concat(keys);
                     method += `()=>{return ${expStr} ? ${addTagAndOption(handleTag(dependent), handleOption())}`
+                    addDependency(expStr);
                 })();
                 ifModified.ifElseList.forEach(item => {
                     const { expStr, keys } = item.view.ifExp.elseIfCond;
                     allKeys = allKeys.concat(keys);
                     method += `:${expStr} ? ${createJsEqFromCompiled(item, dependent)} `
+                    addDependency(expStr);
                 });
 
                 let keysAsString = convertArrayToString(Array.from(new Set(allKeys)));
@@ -392,17 +421,30 @@ export function createRenderer(template: string, moduleId?: string) {
                     elseString = `ce()`;
                 }
                 method += `:${elseString} }`
+                if (depKeys.length > 0) {
+                    let wrapperMethod = `()=>{ 
+                        const el = (${method})();
+                    `;
+                    depKeys.forEach(depKey => {
+                        wrapperMethod += `addRc('${depKey}', el)`;
+                    });
+                    wrapperMethod += `
+                        return el;
+                    } 
+                    `
+                    method = wrapperMethod;
+                }
                 str += `he(${method},${keysAsString})`
             }
             else {
                 let forExp = compiled.view.forExp;
                 if (forExp) {
                     const tagStr = handleTag(forExp.key);
-                    const op = handleOption();
+                    const op = handleOption(forExp.key);
                     str += handleFor(tagStr, op);
                 }
                 else {
-                    str += addTagAndOption(handleTag(dependent), handleOption());
+                    str += addTagAndOption(handleTag(dependent), handleOption(dependent));
                 }
             }
         }
@@ -415,12 +457,20 @@ export function createRenderer(template: string, moduleId?: string) {
                 brackets += ")"
             });
             handleLocalVar(compiled.localVars, compiled.mustacheExp);
-            let { keys, expStr } = compiled.mustacheExp;
-            expStr = typeof expStr === 'function' ? `(${expStr})()` : expStr;
+            const { keys, expStr } = compiled.mustacheExp;
             method += `${expStr} ${brackets} )} `;
+            const depKey = replaceDependent(expStr, dependent);
+            if (depKey != null) {
+                let wrapperMethod = `()=>{ 
+                        return addRc('${depKey}',(${method})());
+                    } 
+                    `
+                method = wrapperMethod;
+            }
+
             str += `he(${method}, ${convertArrayToString(keys)})`
         }
-        else if (isOnlySpaces(compiled) || (compiled as any).trim().length > 0) {
+        else if ((compiled as any).length > 0 && (isOnlySpaces(compiled) || (compiled as any).trim().length > 0)) {
             str += `ct(${JSON.stringify(compiled)})`;
         }
         return str;
