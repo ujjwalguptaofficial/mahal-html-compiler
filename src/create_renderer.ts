@@ -333,6 +333,9 @@ export function createRenderer(template: string, moduleId?: string) {
                 }
 
                 optionStr += "}";
+                if (optionStr === '{}') {
+                    optionStr = '';
+                }
                 return optionStr;
             }
 
