@@ -15,13 +15,12 @@ const CTX = CONTEXT_STRING;
 const replaceDependent = (expStr: string, dependent: string) => {
     if (dependent && expStr.includes(dependent)) {
         const depWithDot = dependent + '.';
+        let strToReplace = dependent;
         if (expStr.includes(depWithDot)) {
-            return expStr.replace(
-                new RegExp(depWithDot, 'g'), ''
-            );
+            strToReplace = depWithDot;
         }
         return expStr.replace(
-            new RegExp(dependent, 'g'), ''
+            new RegExp(strToReplace, 'g'), ''
         );
     }
     return;
@@ -268,9 +267,8 @@ export function createRenderer(template: string, moduleId?: string) {
                             //         dirValue.keys.splice(indexOfKey, 1);
                             //     }
                             // })
-                            handleLocalVar(compiled.localVars, dirValue);
+                            const depKey = handleLocalVar(compiled.localVars, dirValue);
                             dirBinding.value.push(dirValue.expStr)
-                            const depKey = replaceDependent(dirValue.expStr, type);
                             if (depKey != null) {
                                 rc[depKey] = 1;
                             }
@@ -456,10 +454,10 @@ export function createRenderer(template: string, moduleId?: string) {
                 method += `f('${item}',`
                 brackets += ")"
             });
-            handleLocalVar(compiled.localVars, compiled.mustacheExp);
+            const depKey = handleLocalVar(compiled.localVars, compiled.mustacheExp);
             const { keys, expStr } = compiled.mustacheExp;
             method += `${expStr} ${brackets} )} `;
-            const depKey = replaceDependent(expStr, dependent);
+            // const depKey = replaceDependent(expStr, dependent);
             if (depKey != null) {
                 let wrapperMethod = `()=>{ 
                         return addRc('${depKey}',(${method})());
