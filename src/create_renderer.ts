@@ -12,20 +12,6 @@ import { handleLocalVar } from "./handle_local_var";
 
 const CTX = CONTEXT_STRING;
 
-const replaceDependent = (expStr: string, dependent: string) => {
-    if (dependent && expStr.includes(dependent)) {
-        const depWithDot = dependent + '.';
-        let strToReplace = dependent;
-        if (expStr.includes(depWithDot)) {
-            strToReplace = depWithDot;
-        }
-        return expStr.replace(
-            new RegExp(strToReplace, 'g'), ''
-        );
-    }
-    return;
-}
-
 export function createRenderer(template: string, moduleId?: string) {
     template = template.trim();
     let compiledParent: ICompiledView;
@@ -156,7 +142,6 @@ export function createRenderer(template: string, moduleId?: string) {
                         const ifExp = child.view.ifExp;
                         if (ifExp.ifCond) {
                             isIfCondEndFound = false;
-                            handleLocalVar(compiled.localVars, ifExp.ifCond);
                             ifModifiedExpression = {
                                 ifExp: ifExp.ifCond,
                                 ifElseList: []
@@ -391,23 +376,24 @@ export function createRenderer(template: string, moduleId?: string) {
                 let allKeys = [];
                 let method = '';
                 const depKeys = [];
-                const addDependency = (expStr: string) => {
-                    const depKey = replaceDependent(expStr, dependent);
-                    if (depKey != null) {
-                        depKeys.push(depKey);
+                const addDependency = (expression: IExpression) => {
+                    const rcKey = handleLocalVar(compiled.localVars, expression);
+                    // const depKey = replaceDependent(expStr, dependent);
+                    if (rcKey != null) {
+                        depKeys.push(rcKey);
                     }
                 }
                 (() => {
+                    addDependency(ifModified.ifExp);
                     const { expStr, keys } = ifModified.ifExp;
                     allKeys = allKeys.concat(keys);
                     method += `()=>{return ${expStr} ? ${addTagAndOption(handleTag(dependent), handleOption())}`
-                    addDependency(expStr);
                 })();
                 ifModified.ifElseList.forEach(item => {
+                    addDependency(item.view.ifExp.elseIfCond);
                     const { expStr, keys } = item.view.ifExp.elseIfCond;
                     allKeys = allKeys.concat(keys);
                     method += `:${expStr} ? ${createJsEqFromCompiled(item, dependent)} `
-                    addDependency(expStr);
                 });
 
                 let keysAsString = convertArrayToString(Array.from(new Set(allKeys)));
