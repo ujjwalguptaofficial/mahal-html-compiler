@@ -1,20 +1,13 @@
 import { removeCommaFromLast } from "./remove_comma_from_last";
 import { comparisionOpRegex, stringRegex } from "./constant";
-import { IDirectiveBinding } from "./interface";
 
 export function convertArrayToString(value: string[], shouldAddSingleQuote = true) {
     let result = "[";
     value.forEach(val => {
-        if (typeof val === 'function') {
-            result += `( ${val} )()`
-        }
-        else {
-            result += (shouldAddSingleQuote === true ? (
-                stringRegex.test(val) === true ? val : `'${val}'`) :
-                val)
-        }
 
-        result += ",";
+        result += (shouldAddSingleQuote === true ? (
+            stringRegex.test(val) === true ? val : `'${val}'`) :
+            val) + ","
 
     })
     result = removeCommaFromLast(result);

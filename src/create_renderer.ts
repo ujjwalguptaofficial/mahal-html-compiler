@@ -329,12 +329,7 @@ export function createRenderer(template: string, moduleId?: string) {
                 }
 
                 if (getObjectLength(rc) != 0) {
-                    optionStr += `${optionStr.length > 2 ? "," : ''} rc:(el)=>{
-                       const rc = ${JSON.stringify(rc)};
-                       for(const key in rc){
-                          addRc(key,el)
-                       }
-                    }`;
+                    optionStr += `${optionStr.length > 2 ? "," : ''} rc:[${JSON.stringify(rc)},()=>addRc]`;
                 }
 
                 optionStr += "}";
