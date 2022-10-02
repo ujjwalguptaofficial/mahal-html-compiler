@@ -93,10 +93,10 @@ export function createRenderer(template: string, moduleId?: string) {
         }
     }
     let parentStr = `const ${CONTEXT_STRING}= this;
-    const ce = renderer.createElement;
+    const createEl = '_createEl_';
     const ct = renderer.createTextNode;
-    const f = renderer.format;
-    const he = renderer.runExp;
+    const FILTER = 'format';
+    const HANDLE_EXPRESSION = '_handleExp_';
     const addRc_ = renderer.addRc;
     `;
     const createJsEqFromCompiled = (compiled: ICompiledView, dependent?: string) => {
@@ -104,7 +104,7 @@ export function createRenderer(template: string, moduleId?: string) {
         if (compiled.view) {
             const handleTag = (type?: string) => {
                 const htmlTag = compiled.view.tag;
-                let tagHtml = htmlTag == null ? `ce(null,` : `ce('${htmlTag}',`
+                let tagHtml = htmlTag == null ? `${CONTEXT_STRING}[createEl](null,` : `${CONTEXT_STRING}[createEl]('${htmlTag}',`
 
                 if (compiled.child) {
                     let ifModifiedExpression: IIfExpModified;
@@ -306,7 +306,7 @@ export function createRenderer(template: string, moduleId?: string) {
                                 let method = `()=>{return `;
                                 let brackets = "";
                                 item.filters.reverse().forEach(item => {
-                                    method += `f('${item}',`
+                                    method += `${CTX}[FILTER]('${item}',`
                                     brackets += ")"
                                 });
                                 method += `${val.expStr} ${brackets} }`;
@@ -363,7 +363,7 @@ export function createRenderer(template: string, moduleId?: string) {
                     })()
             
                 }`;
-                return `...he(${method},${convertArrayToString(keys)},'for')`;
+                return `...${CTX}[HANDLE_EXPRESSION](${method},${convertArrayToString(keys)},'for')`;
                 //return forStr;
             }
             const ifModified = compiled.view.ifExpModified;
@@ -397,7 +397,7 @@ export function createRenderer(template: string, moduleId?: string) {
                     elseString = createJsEqFromCompiled(ifModified.else, dependent);
                 }
                 else {
-                    elseString = `ce()`;
+                    elseString = `${CONTEXT_STRING}[createEl]()`;
                 }
                 method += `:${elseString} }`
                 if (depKeys.length > 0) {
@@ -413,7 +413,7 @@ export function createRenderer(template: string, moduleId?: string) {
                     `
                     method = wrapperMethod;
                 }
-                str += `he(${method},${keysAsString})`
+                str += `${CTX}[HANDLE_EXPRESSION](${method},${keysAsString})`
             }
             else {
                 let forExp = compiled.view.forExp;
@@ -432,7 +432,7 @@ export function createRenderer(template: string, moduleId?: string) {
             let method = `()=>{  return ct(`;
             let brackets = "";
             compiled.filters.reverse().forEach(item => {
-                method += `f('${item}',`
+                method += `${CTX}[FILTER]('${item}',`
                 brackets += ")"
             });
             const depKey = handleLocalVar(compiled.localVars, compiled.mustacheExp);
@@ -447,7 +447,7 @@ export function createRenderer(template: string, moduleId?: string) {
                 method = wrapperMethod;
             }
 
-            str += `he(${method}, ${convertArrayToString(keys)})`
+            str += `${CTX}[HANDLE_EXPRESSION](${method}, ${convertArrayToString(keys)})`
         }
         else if ((compiled as any).length > 0 && (isOnlySpaces(compiled) || (compiled as any).trim().length > 0)) {
             str += `ct(${JSON.stringify(compiled)})`;
