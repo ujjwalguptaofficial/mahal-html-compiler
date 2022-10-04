@@ -448,26 +448,34 @@ export function createRenderer(template: string, moduleId?: string) {
             }
         }
         else if (compiled.mustacheExp) {
-
-            let method = `()=>{  return ct(`;
-            let brackets = "";
-            compiled.filters.reverse().forEach(item => {
-                method += `${CTX}[FILTER]('${item}',`
-                brackets += ")"
-            });
             const depKey = handleLocalVar(compiled.localVars, compiled.mustacheExp);
             const { keys, expStr } = compiled.mustacheExp;
-            method += `${expStr} ${brackets} )} `;
+
+            let expForMustacheContent = '';
+
+            expForMustacheContent += 'ct(';
+            let brackets = "";
+            compiled.filters.reverse().forEach(item => {
+                expForMustacheContent += `${CTX}[FILTER]('${item}',`
+                brackets += ")"
+            });
+
+            expForMustacheContent += `${expStr} ${brackets} ) `;
+
+            expForMustacheContent += keys.length > 0 ? '}' : '';
+
             // const depKey = replaceDependent(expStr, dependent);
             if (depKey != null) {
-                let wrapperMethod = `()=>{ 
-                        return addRc('${depKey}',(${method})());
-                    } 
-                    `
-                method = wrapperMethod;
+                let wrapperMethod = `addRc('${depKey}',${expForMustacheContent})`
+                expForMustacheContent = wrapperMethod;
             }
 
-            str += `${CTX}[HANDLE_EXPRESSION](${method}, ${convertArrayToString(keys)})`
+            if (keys.length > 0) {
+                str += `${CTX}[HANDLE_EXPRESSION](()=>{  return ${expForMustacheContent}, ${convertArrayToString(keys)})`;
+            }
+            else {
+                str += expForMustacheContent;
+            }
         }
         else if ((compiled as any).length > 0 && (isOnlySpaces(compiled) || (compiled as any).trim().length > 0)) {
             str += `ct(${JSON.stringify(compiled)})`;
