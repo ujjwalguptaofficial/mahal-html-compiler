@@ -22,6 +22,7 @@
     "webpack:dev": "webpack --config webpack/webpack.config.dev.js",
     "webpack:test": "webpack --config webpack/webpack.config.test.js",
     "build:test": "npm run build:pack && npm run test",
+    "build:test:mahal": "npm run build:test && npm run test:mahal",
     "deploy": "npm run clean && npm run build:test && npm run test:mahal",
     "install:self": "npm i mahal-html-compiler-0.5.0.tgz --no-save",
     "debug": "npm run build:pack && cd test && npm run install:debug",

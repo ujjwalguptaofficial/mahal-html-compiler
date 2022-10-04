@@ -233,7 +233,7 @@ export function createRenderer(template: string, moduleId?: string) {
                     });
                     optionStr += `on:{${eventStr}}`;
                 }
-
+                let isRcFound = false;
                 if (compiled.view.dir) {
                     optionStr += `${optionStr.length > 2 ? "," : ''} dir:{`;
                     for (const dirName in compiled.view.dir) {
@@ -241,7 +241,8 @@ export function createRenderer(template: string, moduleId?: string) {
                         const dirBinding = {
                             value: [],
                             props: [],
-                            params: []
+                            params: [],
+                            rcKey: null
                         }
                         compiled.view.dir[dirName].forEach(dirValue => {
                             // const expressionEvaluation = addCtxToExpression(dirValue);
@@ -256,6 +257,8 @@ export function createRenderer(template: string, moduleId?: string) {
                             dirBinding.value.push(dirValue.expStr)
                             if (depKey != null) {
                                 rc[depKey] = 1;
+                                dirBinding.rcKey = depKey;
+                                isRcFound = true;
                             }
                             dirBinding.props = [...dirBinding.props, ...dirValue.keys]
                             dirBinding.params.push(dirValue.raw)
@@ -268,9 +271,11 @@ export function createRenderer(template: string, moduleId?: string) {
                                     ${createSetterForDirective(dirBinding, CTX)}
                                 },
                                 props:${convertArrayToString(dirBinding.props)},
-                                params: ${convertArrayToString(dirBinding.value, false)}
-                              },
-                            `;
+                                params: ${convertArrayToString(dirBinding.value, false)}`;
+                        if (dirBinding.rcKey) {
+                            optionStr += `,rc:'${dirBinding.rcKey}'`
+                        }
+                        optionStr += `},`;
 
                     }
                     optionStr = removeCommaFromLast(optionStr) + "}";
@@ -298,9 +303,16 @@ export function createRenderer(template: string, moduleId?: string) {
                     attr.forEach((item, index) => {
                         if (item.isExpression) {
                             const val: IExpression = item.value as IExpression;
-                            handleLocalVar(compiled.localVars, val);
+                            const rcKey = handleLocalVar(compiled.localVars, val);
+                            if (rcKey != null) {
+                                // rc[rcKey] = 1;
+                                isRcFound = true;
+                            }
                             const getKey = () => {
                                 return val.keys.length > 0 ? `'${val.keys[0]}'` : null
+                            }
+                            const getRcKey = () => {
+                                return rcKey ? `'${rcKey}'` : null
                             }
                             if (item.filters.length > 0) {
                                 let method = `()=>{return `;
@@ -314,7 +326,7 @@ export function createRenderer(template: string, moduleId?: string) {
                             }
                             else {
                                 const attributeValue = val.expStr;
-                                attrString += `${item.key}:{v: ${attributeValue},k:${getKey()}}`;
+                                attrString += `${item.key}:{v: ${attributeValue},k:${getKey()},rc:${getRcKey()}}`;
                             }
                         }
                         else {
@@ -327,6 +339,11 @@ export function createRenderer(template: string, moduleId?: string) {
 
                     optionStr += `${optionStr.length > 2 ? "," : ''} attr:{${attrString}}`;
                 }
+
+                if (isRcFound) {
+                    optionStr += `${optionStr.length > 2 ? "," : ''} rcm:()=>addRc`;
+                }
+
 
                 if (getObjectLength(rc) != 0) {
                     optionStr += `${optionStr.length > 2 ? "," : ''} rc:[${JSON.stringify(rc)},()=>addRc]`;
