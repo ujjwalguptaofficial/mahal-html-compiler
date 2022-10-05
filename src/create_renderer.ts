@@ -95,7 +95,7 @@ export function createRenderer(template: string, moduleId?: string) {
     let parentStr = `const ${CONTEXT_STRING}= this;
     const createEl = '_createEl_';
     const ct = renderer.createTextNode;
-    const FILTER = 'format';
+    const FORMAT = 'format';
     const HANDLE_EXPRESSION = '_handleExp_';
     const addRc_ = renderer.addRc;
     const ctwrc = renderer.createTextNodeWithRc;
@@ -179,16 +179,6 @@ export function createRenderer(template: string, moduleId?: string) {
                     compiled.child.forEach((item, index) => {
                         let childCompiled = createJsEqFromCompiled(item, type);
                         if (childCompiled && childCompiled.trim().length > 0) {
-                            // const forExp = compiled.view.forExp;
-                            // if (forExp) {
-                            //     childCompiled = `(()=>{
-                            //         const dep = {};
-                            //         const _el_ = ${childCompiled};
-                            //         _el_._reactiveChild_ = dep;
-                            //         return _el_; 
-                            //     })()
-                            //     `
-                            // }
                             child += `${childCompiled},`;
                         }
                     });
@@ -224,14 +214,7 @@ export function createRenderer(template: string, moduleId?: string) {
                             handlerStr += exp.expStr;
                         });
                         handlerStr = removeCommaFromLast(handlerStr) + "]";
-                        eventStr += `${ev.name}: ${handlerStr}`
-                        // eventStr += `${ev.name}: {
-                        //     handlers: ${handlerStr},
-                        //     isNative: ${ev.isNative},
-                        //     option: ${JSON.stringify(ev.option)},
-                        //     modifiers: ${convertArrayToString(ev.modifiers)}
-                        // }`
-
+                        eventStr += `${ev.name}: ${handlerStr}`;
                         if (index + 1 < eventLength) {
                             eventStr += ","
                         }
@@ -250,14 +233,6 @@ export function createRenderer(template: string, moduleId?: string) {
                             rcKey: null
                         }
                         compiled.view.dir[dirName].forEach(dirValue => {
-                            // const expressionEvaluation = addCtxToExpression(dirValue);
-                            // compiled.localVars.forEach(localVar => {
-                            //     if (dirValue.expStr.includes(localVar)) {
-                            //         dirValue.expStr = dirValue.raw.replace(CTX + ".", '');
-                            //         const indexOfKey = dirValue.keys.findIndex(q => q.includes(localVar));
-                            //         dirValue.keys.splice(indexOfKey, 1);
-                            //     }
-                            // })
                             const depKey = handleLocalVar(compiled.localVars, dirValue);
                             dirBinding.value.push(dirValue.expStr)
                             if (depKey != null) {
@@ -285,10 +260,6 @@ export function createRenderer(template: string, moduleId?: string) {
                     optionStr = removeCommaFromLast(optionStr) + "}";
                     // optionStr += "}"
                 }
-
-                // if (compiled.view.html) {
-                //     optionStr += `${optionStr.length > 2 ? "," : ''} html:ctx.${compiled.view.html}`;
-                // }
 
                 // handle attributes
                 const attr = compiled.view.attr;
@@ -322,7 +293,7 @@ export function createRenderer(template: string, moduleId?: string) {
                                 let method = `()=>{return `;
                                 let brackets = "";
                                 item.filters.reverse().forEach(item => {
-                                    method += `${CTX}[FILTER]('${item}',`
+                                    method += `${CTX}[FORMAT]('${item}',`
                                     brackets += ")"
                                 });
                                 method += `${val.expStr} ${brackets} }`;
@@ -429,13 +400,6 @@ export function createRenderer(template: string, moduleId?: string) {
                 method += `:${elseString} }`
                 if (depKeys.length > 0) {
                     let wrapperMethod = `hewrc(${convertArrayToString(depKeys)}, ${method}, addRc)`;
-                    // depKeys.forEach(depKey => {
-                    //     wrapperMethod += `addRc('${depKey}', el)`;
-                    // });
-                    // wrapperMethod += `
-                    //     return el;
-                    // } 
-                    // `
                     method = wrapperMethod;
                 }
                 if (allKeys.length > 0) {
@@ -469,7 +433,7 @@ export function createRenderer(template: string, moduleId?: string) {
             expForMustacheContent += 'ct(';
             let brackets = "";
             compiled.filters.reverse().forEach(item => {
-                expForMustacheContent += `${CTX}[FILTER]('${item}',`
+                expForMustacheContent += `${CTX}[FORMAT]('${item}',`
                 brackets += ")"
             });
 
