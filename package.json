@@ -47,7 +47,7 @@
     "copy-webpack-plugin": "^6.1.1",
     "cross-env": "^7.0.3",
     "del-cli": "^4.0.1",
-    "mahal": "file:../mahal/mahal-1.5.1.tgz",
+    "mahal": "file:../mahal/mahal-1.6.1.tgz",
     "mocha": "^8.2.1",
     "mochapack": "^2.0.6",
     "pegjs": "^0.10.0",

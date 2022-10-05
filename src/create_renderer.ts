@@ -204,7 +204,6 @@ export function createRenderer(template: string, moduleId?: string) {
 
             const handleOption = (type?: string) => {
                 let optionStr = "{";
-                const rc = {};
                 // handle event
                 const eventLength = compiled.view.events.length;
                 if (eventLength > 0) {
@@ -262,7 +261,6 @@ export function createRenderer(template: string, moduleId?: string) {
                             const depKey = handleLocalVar(compiled.localVars, dirValue);
                             dirBinding.value.push(dirValue.expStr)
                             if (depKey != null) {
-                                rc[depKey] = 1;
                                 dirBinding.rcKey = depKey;
                                 isRcFound = true;
                             }
@@ -351,9 +349,9 @@ export function createRenderer(template: string, moduleId?: string) {
                 }
 
 
-                if (getObjectLength(rc) != 0) {
-                    optionStr += `${optionStr.length > 2 ? "," : ''} rc:[${JSON.stringify(rc)},()=>addRc]`;
-                }
+                // if (getObjectLength(rc) != 0) {
+                //     optionStr += `${optionStr.length > 2 ? "," : ''} rc:[${JSON.stringify(rc)},()=>addRc]`;
+                // }
 
                 optionStr += "}";
                 if (optionStr === '{}') {
@@ -440,7 +438,12 @@ export function createRenderer(template: string, moduleId?: string) {
                     // `
                     method = wrapperMethod;
                 }
-                str += `${CTX}[HANDLE_EXPRESSION](${method},${keysAsString})`
+                // if (allKeys.length > 0) {
+                str += `${CTX}[HANDLE_EXPRESSION](${method},${keysAsString})`;
+                // }
+                // else {
+                //     str += method;
+                // }
             }
             else {
                 let forExp = compiled.view.forExp;
