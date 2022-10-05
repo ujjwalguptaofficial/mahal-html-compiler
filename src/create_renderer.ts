@@ -428,7 +428,7 @@ export function createRenderer(template: string, moduleId?: string) {
                 }
                 method += `:${elseString} }`
                 if (depKeys.length > 0) {
-                    let wrapperMethod = `()=> hewrc(${convertArrayToString(depKeys)}, ${method}, addRc)`;
+                    let wrapperMethod = `hewrc(${convertArrayToString(depKeys)}, ${method}, addRc)`;
                     // depKeys.forEach(depKey => {
                     //     wrapperMethod += `addRc('${depKey}', el)`;
                     // });
@@ -438,12 +438,15 @@ export function createRenderer(template: string, moduleId?: string) {
                     // `
                     method = wrapperMethod;
                 }
-                // if (allKeys.length > 0) {
-                str += `${CTX}[HANDLE_EXPRESSION](${method},${keysAsString})`;
-                // }
-                // else {
-                //     str += method;
-                // }
+                if (allKeys.length > 0) {
+                    if (depKeys.length > 0) {
+                        method = `()=>` + method;
+                    }
+                    str += `${CTX}[HANDLE_EXPRESSION](${method},${keysAsString})`;
+                }
+                else {
+                    str += method;
+                }
             }
             else {
                 let forExp = compiled.view.forExp;
