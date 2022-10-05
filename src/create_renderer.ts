@@ -98,6 +98,8 @@ export function createRenderer(template: string, moduleId?: string) {
     const FILTER = 'format';
     const HANDLE_EXPRESSION = '_handleExp_';
     const addRc_ = renderer.addRc;
+    const ctwrc = renderer.createTextNodeWithRc;
+    const hewrc = renderer.handleExpWithRc;
     `;
     const createJsEqFromCompiled = (compiled: ICompiledView, dependent?: string) => {
         let str = "";
@@ -131,10 +133,14 @@ export function createRenderer(template: string, moduleId?: string) {
                         const forExpindex = forExp.index;
                         const forValue = forExp.value.raw;
                         localVars.push(forExpkey, `${forExpkey}.`, `${forExpkey}[`, forExpindex, `${forValue}[${forExpindex}]`)
+                        localVars['forExp'] = forExp;
                     }
                     compiled.child.forEach((child, index) => {
                         if (typeof child === 'object') {
                             child.localVars = (child.localVars || []).concat(localVars);
+                            if (localVars['forExp']) {
+                                child.localVars['forExp'] = localVars['forExp'];
+                            }
                         }
                         if (!(child.view && child.view.ifExp)) {
                             return onIfCondEnd(index);
@@ -379,6 +385,9 @@ export function createRenderer(template: string, moduleId?: string) {
                         const _el_ = ${tagStr + ','} option );
                         // stands for reactive child
                         _el_._rc_ = rc;
+                        _el_. _setVal_ = (newValue)=>{
+                            ${forExp.key} = newValue;
+                        }
                         return _el_; 
                     })()
             
@@ -421,16 +430,14 @@ export function createRenderer(template: string, moduleId?: string) {
                 }
                 method += `:${elseString} }`
                 if (depKeys.length > 0) {
-                    let wrapperMethod = `()=>{ 
-                        const el = (${method})();
-                    `;
-                    depKeys.forEach(depKey => {
-                        wrapperMethod += `addRc('${depKey}', el)`;
-                    });
-                    wrapperMethod += `
-                        return el;
-                    } 
-                    `
+                    let wrapperMethod = `()=> hewrc(${convertArrayToString(depKeys)}, ${method}, addRc)`;
+                    // depKeys.forEach(depKey => {
+                    //     wrapperMethod += `addRc('${depKey}', el)`;
+                    // });
+                    // wrapperMethod += `
+                    //     return el;
+                    // } 
+                    // `
                     method = wrapperMethod;
                 }
                 str += `${CTX}[HANDLE_EXPRESSION](${method},${keysAsString})`
@@ -466,7 +473,7 @@ export function createRenderer(template: string, moduleId?: string) {
 
             // const depKey = replaceDependent(expStr, dependent);
             if (depKey != null) {
-                let wrapperMethod = `addRc('${depKey}',${expForMustacheContent})`
+                let wrapperMethod = `ctwrc('${depKey}',${expForMustacheContent},addRc)`
                 expForMustacheContent = wrapperMethod;
             }
 
