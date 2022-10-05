@@ -289,6 +289,10 @@ export function createRenderer(template: string, moduleId?: string) {
                             const getRcKey = () => {
                                 return rcKey ? `'${rcKey}'` : null
                             }
+                            const keyToWatch = getKey();
+                            const strForKeyToWatch = keyToWatch ? `,k:${keyToWatch}` : ''
+                            const rcKeyToWatch = getRcKey();
+                            const strForRcKey = rcKeyToWatch ? `,rc:${rcKeyToWatch}` : ''
                             if (item.filters.length > 0) {
                                 let method = `()=>{return `;
                                 let brackets = "";
@@ -297,11 +301,12 @@ export function createRenderer(template: string, moduleId?: string) {
                                     brackets += ")"
                                 });
                                 method += `${val.expStr} ${brackets} }`;
-                                attrString += `${item.key}:{v: ${method},k: ${getKey()} , m:true}`;
+                                attrString += `${item.key}:{v: ${method} ${strForKeyToWatch} ${strForRcKey} , m:true}`;
                             }
                             else {
                                 const attributeValue = val.expStr;
-                                attrString += `${item.key}:{v: ${attributeValue},k:${getKey()},rc:${getRcKey()}}`;
+
+                                attrString += `${item.key}:{v: ${attributeValue} ${strForKeyToWatch} ${strForRcKey} }`;
                             }
                         }
                         else {
