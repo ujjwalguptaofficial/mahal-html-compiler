@@ -25,9 +25,11 @@ export const handleLocalVar = (localVars: string[], exp: IExpression) => {
                 const strToReplace = deletedKey.includes(localVarWithDot) ? localVarWithDot : localVar;
                 if (strToReplace != forExp.index) {
                     const rcKey = deletedKey.replace(strToReplace, '');
+                    // if (rcKey !== 'key') {
                     rcKeys.push(
                         rcKey
                     );
+                    // }
                 }
             }
         }

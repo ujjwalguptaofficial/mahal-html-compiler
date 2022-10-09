@@ -93,7 +93,7 @@ export function createRenderer(template: string, moduleId?: string) {
         }
     }
     let parentStr = `const ${CONTEXT_STRING}= this;
-    const createEl = '_createEl_';
+    const createEl = renderer.createEl.bind(${CONTEXT_STRING});
     const ct = renderer.createTextNode;
     const FORMAT = 'format';
     const HANDLE_EXPRESSION = '_handleExp_';
@@ -106,7 +106,7 @@ export function createRenderer(template: string, moduleId?: string) {
         if (compiled.view) {
             const handleTag = (type?: string) => {
                 const htmlTag = compiled.view.tag;
-                let tagHtml = htmlTag == null ? `${CONTEXT_STRING}[createEl](null,` : `${CONTEXT_STRING}[createEl]('${htmlTag}',`
+                let tagHtml = htmlTag == null ? `createEl(null,` : `createEl('${htmlTag}',`
 
                 if (compiled.child) {
                     let ifModifiedExpression: IIfExpModified;
@@ -275,10 +275,14 @@ export function createRenderer(template: string, moduleId?: string) {
                 const attrLength = attr.length;
                 if (attrLength > 0 || compiled.view.forExp) {
                     let attrString = '';
+                    let reactiveAttrString = '';
                     attr.forEach((item, index) => {
                         if (item.isExpression) {
                             const val: IExpression = item.value as IExpression;
-                            const rcKey = handleLocalVar(compiled.localVars, val);
+                            let rcKey = handleLocalVar(compiled.localVars, val);
+                            if (item.key === "'key'") {
+                                rcKey = null;
+                            }
                             if (rcKey != null) {
                                 // rc[rcKey] = 1;
                                 isRcFound = true;
@@ -301,23 +305,34 @@ export function createRenderer(template: string, moduleId?: string) {
                                     brackets += ")"
                                 });
                                 method += `${val.expStr} ${brackets} }`;
-                                attrString += `${item.key}:{v: ${method} ${strForKeyToWatch} ${strForRcKey} , m:true}`;
+                                reactiveAttrString += `${item.key}:{v: ${method} ${strForKeyToWatch} ${strForRcKey} , m:true}`;
                             }
                             else {
                                 const attributeValue = val.expStr;
 
-                                attrString += `${item.key}:{v: ${attributeValue} ${strForKeyToWatch} ${strForRcKey} }`;
+                                reactiveAttrString += `${item.key}:{v: ${attributeValue} ${strForKeyToWatch} ${strForRcKey} }`;
                             }
                         }
                         else {
                             attrString += `${item.key}:{v:'${item.value}'}`;
                         }
                         if (index + 1 < attrLength) {
-                            attrString += ","
+                            if (item.isExpression) {
+                                reactiveAttrString += ","
+                            }
+                            else {
+                                attrString += ","
+                            }
                         }
                     });
+                    if (attrString.length > 0) {
+                        optionStr += `${optionStr.length > 2 ? "," : ''} attr:{${attrString}}`;
+                    }
 
-                    optionStr += `${optionStr.length > 2 ? "," : ''} attr:{${attrString}}`;
+                    if (reactiveAttrString.length > 0) {
+                        optionStr += `${optionStr.length > 2 ? "," : ''} rAttr:{${reactiveAttrString}}`;
+                    }
+
                 }
 
                 if (isRcFound) {
@@ -346,10 +361,14 @@ export function createRenderer(template: string, moduleId?: string) {
                 // const getRegex = (subStr) => {
                 //     return new RegExp(subStr, 'g');
                 // }
+                optionStr = optionStr || '{rAttr:{}}';
                 const method = `(${forExp.key},${forExp.index}, returnKey)=>{
                     let addRc;
                     const option = ${optionStr};
-                    const attr = option.attr;
+                    let attr = option.rAttr;
+                    if(!attr){
+                        attr = option.rAttr = {};
+                    }
                     if(!attr.key) {
                         attr.key=   {v :  ${forExp.index}}
                     }
@@ -400,7 +419,7 @@ export function createRenderer(template: string, moduleId?: string) {
                     elseString = createJsEqFromCompiled(ifModified.else, dependent);
                 }
                 else {
-                    elseString = `${CONTEXT_STRING}[createEl]()`;
+                    elseString = `createEl()`;
                 }
                 method += `:${elseString} }`
                 if (depKeys.length > 0) {
