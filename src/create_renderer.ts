@@ -288,7 +288,7 @@ export function createRenderer(template: string, moduleId?: string) {
                                 isRcFound = true;
                             }
                             const getKey = () => {
-                                return val.keys.length > 0 ? `'${val.keys[0]}'` : null
+                                return val.keys.length > 0 ? convertArrayToString(val.keys) : null
                             }
                             const getRcKey = () => {
                                 return rcKey ? `'${rcKey}'` : null
@@ -297,21 +297,23 @@ export function createRenderer(template: string, moduleId?: string) {
                             const strForKeyToWatch = keyToWatch ? `,k:${keyToWatch}` : ''
                             const rcKeyToWatch = getRcKey();
                             const strForRcKey = rcKeyToWatch ? `,rc:${rcKeyToWatch}` : ''
+                            let method;
                             if (item.filters.length > 0) {
-                                let method = `()=>{return `;
+                                method = `{return `;
                                 let brackets = "";
                                 item.filters.reverse().forEach(item => {
                                     method += `${CTX}[FORMAT]('${item}',`
                                     brackets += ")"
                                 });
                                 method += `${val.expStr} ${brackets} }`;
-                                reactiveAttrString += `${item.key}:{v: ${method} ${strForKeyToWatch} ${strForRcKey} , m:true}`;
+                                // reactiveAttrString += `${item.key}:{get v() ${method} ${strForKeyToWatch} ${strForRcKey}}`;
                             }
                             else {
-                                const attributeValue = val.expStr;
+                                method = `{ return ${val.expStr} }`;
 
-                                reactiveAttrString += `${item.key}:{v: ${attributeValue} ${strForKeyToWatch} ${strForRcKey} }`;
+                                // reactiveAttrString += `${item.key}:{get v() ${attributeValue} ${strForKeyToWatch} ${strForRcKey}}`;
                             }
+                            reactiveAttrString += `${item.key}:{get v() ${method} ${strForKeyToWatch} ${strForRcKey}}`;
                         }
                         else {
                             attrString += `${item.key}:{v:'${item.value}'}`;
