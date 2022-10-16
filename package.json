@@ -1,7 +1,7 @@
 {
   "name": "@mahaljs/html-compiler",
   "displayName": "mahal-html-compiler",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "description": "Html compiler for mahal framework",
   "main": "dist/npm.export.js",
   "types": "dist/ts/index.d.ts",
