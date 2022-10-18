@@ -230,13 +230,13 @@ export function createRenderer(template: string, moduleId?: string) {
                             value: [],
                             props: [],
                             params: [],
-                            rcKey: null
+                            rcKeys: null
                         }
                         compiled.view.dir[dirName].forEach(dirValue => {
-                            const depKey = handleLocalVar(compiled.localVars, dirValue);
+                            const rcKeys = handleLocalVar(compiled.localVars, dirValue);
                             dirBinding.value.push(dirValue.expStr)
-                            if (depKey != null) {
-                                dirBinding.rcKey = depKey;
+                            if (rcKeys.length > 0) {
+                                dirBinding.rcKeys = rcKeys;
                                 isRcFound = true;
                             }
                             dirBinding.props = [...dirBinding.props, ...dirValue.keys]
@@ -251,8 +251,8 @@ export function createRenderer(template: string, moduleId?: string) {
                                 },
                                 props:${convertArrayToString(dirBinding.props)},
                                 params: ${convertArrayToString(dirBinding.value, false)}`;
-                        if (dirBinding.rcKey) {
-                            optionStr += `,rc:'${dirBinding.rcKey}'`
+                        if (dirBinding.rcKeys) {
+                            optionStr += `,rc:${convertArrayToString(dirBinding.rcKeys)}`
                         }
                         optionStr += `},`;
 
@@ -279,11 +279,11 @@ export function createRenderer(template: string, moduleId?: string) {
                     attr.forEach((item, index) => {
                         if (item.isExpression) {
                             const val: IExpression = item.value as IExpression;
-                            let rcKey = handleLocalVar(compiled.localVars, val);
+                            let rcKeys = handleLocalVar(compiled.localVars, val);
                             if (item.key === "'key'") {
-                                rcKey = null;
+                                rcKeys = [];
                             }
-                            if (rcKey != null) {
+                            if (rcKeys.length > 0) {
                                 // rc[rcKey] = 1;
                                 isRcFound = true;
                             }
@@ -291,7 +291,7 @@ export function createRenderer(template: string, moduleId?: string) {
                                 return val.keys.length > 0 ? convertArrayToString(val.keys) : null
                             }
                             const getRcKey = () => {
-                                return rcKey ? `'${rcKey}'` : null
+                                return rcKeys.length > 0 ? convertArrayToString(rcKeys) : null
                             }
                             const keyToWatch = getKey();
                             const strForKeyToWatch = keyToWatch ? `,k:${keyToWatch}` : ''
@@ -396,10 +396,10 @@ export function createRenderer(template: string, moduleId?: string) {
                 let method = '';
                 const depKeys = [];
                 const addDependency = (expression: IExpression) => {
-                    const rcKey = handleLocalVar(compiled.localVars, expression);
+                    const rcKeys = handleLocalVar(compiled.localVars, expression);
                     // const depKey = replaceDependent(expStr, dependent);
-                    if (rcKey != null) {
-                        depKeys.push(rcKey);
+                    if (rcKeys.length > 0) {
+                        depKeys.push(...rcKeys);
                     }
                 }
                 (() => {
@@ -451,7 +451,7 @@ export function createRenderer(template: string, moduleId?: string) {
             }
         }
         else if (compiled.mustacheExp) {
-            const depKey = handleLocalVar(compiled.localVars, compiled.mustacheExp);
+            const rcKeys = handleLocalVar(compiled.localVars, compiled.mustacheExp);
             const { keys, expStr } = compiled.mustacheExp;
 
             let expForMustacheContent = '';
@@ -468,8 +468,8 @@ export function createRenderer(template: string, moduleId?: string) {
             expForMustacheContent += keys.length > 0 ? '}' : '';
 
             // const depKey = replaceDependent(expStr, dependent);
-            if (depKey != null) {
-                let wrapperMethod = `ctwrc('${depKey}',${expForMustacheContent},addRc)`
+            if (rcKeys.length > 0) {
+                let wrapperMethod = `ctwrc(${convertArrayToString(rcKeys)},${expForMustacheContent},addRc)`
                 expForMustacheContent = wrapperMethod;
             }
 

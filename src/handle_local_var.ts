@@ -17,22 +17,35 @@ export const handleLocalVar = (localVars: string[], exp: IExpression) => {
             if (nextChar && nextChar.match(alphabetRegex)) {
                 return;
             }
-            exp.expStr = expStr.replace(expressionToCheck, localVar);
-            const indexOfKey = exp.keys.findIndex(q => q.includes(localVar));
-            if (indexOfKey >= 0) {
-                const deletedKey = exp.keys.splice(indexOfKey, 1)[0];
-                const localVarWithDot = localVar + '.';
-                const strToReplace = deletedKey.includes(localVarWithDot) ? localVarWithDot : localVar;
-                if (strToReplace != forExp.index) {
-                    const rcKey = deletedKey.replace(strToReplace, '');
-                    // if (rcKey !== 'key') {
-                    rcKeys.push(
-                        rcKey
-                    );
-                    // }
+
+            const regexExpressionToCheck = new RegExp(expressionToCheck, 'g');
+            exp.expStr = expStr.replace(regexExpressionToCheck, localVar);
+
+
+            exp.keys = exp.keys.filter((key, i) => {
+                if (key.includes(localVar)) {
+                    const localVarWithDot = localVar + '.';
+                    const strToReplace = key.includes(localVarWithDot) ? localVarWithDot : localVar;
+                    if (strToReplace != forExp.index) {
+                        const rcKey = key.replace(strToReplace, '');
+                        rcKeys.push(
+                            rcKey
+                        );
+                    }
+                    return false;
                 }
-            }
+                return true;
+            })
+
+            // indexesOfKey.forEach(indexOfKey => {
+            //     // const indexOfKey = exp.keys.findIndex(q => q.includes(localVar));
+            //     // if (indexOfKey >= 0) {
+
+            //     // }
+            // })
+
+
         }
     })
-    return rcKeys[0];
+    return rcKeys;
 }
