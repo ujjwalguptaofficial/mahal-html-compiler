@@ -272,6 +272,20 @@ export function createRenderer(template: string, moduleId?: string) {
                         filters: []
                     });
                 }
+
+                switch (compiled.view.tag) {
+                    case 'slot':
+                    case 'target':
+                        if (!attr.find(q => q.key === "'name'")) {
+                            attr.push({
+                                key: 'name',
+                                value: 'default',
+                                isExpression: false,
+                                filters: []
+                            });
+                        }
+                }
+
                 const attrLength = attr.length;
                 if (attrLength > 0 || compiled.view.forExp) {
                     let attrString = '';
