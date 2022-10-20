@@ -2,7 +2,7 @@ import { parseview } from "./parse_view";
 import { getObjectLength, isOnlySpaces, LogHelper } from "./utils";
 import { ERROR_TYPE } from "./enums";
 import { CONTEXT_STRING } from "./constant";
-import { ICompiledView, IIfExpModified } from "./interface";
+import { ICompiledView, IForExp, IIfExpModified } from "./interface";
 import { removeCommaFromLast } from "./remove_comma_from_last";
 import { convertArrayToString, createSetterForDirective } from "./convert_array_to_comma_seperated_string";
 import beautify from 'js-beautify';
@@ -100,6 +100,7 @@ export function createRenderer(template: string, moduleId?: string) {
     const addRc_ = renderer.addRc;
     const ctwrc = renderer.createTextNodeWithRc;
     const hewrc = renderer.handleExpWithRc;
+    const hfewrc = renderer.handleForExpWithRc;
     `;
     const createJsEqFromCompiled = (compiled: ICompiledView, dependent?: string) => {
         let str = "";
@@ -127,20 +128,39 @@ export function createRenderer(template: string, moduleId?: string) {
                         indexOfIfCond = null;
                     }
                     const forExp = compiled.view.forExp;
-                    let localVars = compiled.localVars || [];
+                    let localVars = compiled.localVars || {};
                     if (forExp) {
                         const forExpkey = forExp.key;
                         const forExpindex = forExp.index;
                         const forValue = forExp.value.raw;
-                        localVars.push(forExpkey, `${forExpkey}.`, `${forExpkey}[`, forExpindex, `${forValue}[${forExpindex}]`)
-                        localVars['forExp'] = forExp;
+                        localVars[forExpkey] = [
+                            forExpkey,
+                            `${forExpkey}.`,
+                            `${forExpkey}[`,
+                            forExpindex,
+                            `${forValue}[${forExpindex}]`
+                        ]
+                        localVars[forExpkey]['forExp'] = forExp;
                     }
                     compiled.child.forEach((child, index) => {
                         if (typeof child === 'object') {
-                            child.localVars = (child.localVars || []).concat(localVars);
-                            if (localVars['forExp']) {
-                                child.localVars['forExp'] = localVars['forExp'];
+                            child.localVars = {};
+                            if (localVars) {
+                                for (const key in localVars) {
+                                    const localVarsValue = localVars[key];
+                                    if (!child.localVars[key]) {
+                                        child.localVars[key] = [];
+                                    }
+                                    child.localVars[key] = child.localVars[key].concat(
+                                        localVarsValue
+                                    )
+
+                                    if (localVarsValue['forExp']) {
+                                        child.localVars[key]['forExp'] = localVarsValue['forExp'];
+                                    }
+                                }
                             }
+
                         }
                         if (!(child.view && child.view.ifExp)) {
                             return onIfCondEnd(index);
@@ -221,7 +241,7 @@ export function createRenderer(template: string, moduleId?: string) {
                     });
                     optionStr += `on:{${eventStr}}`;
                 }
-                let isRcFound = false;
+                let { isRcFound, localVarKey } = { isRcFound: false, localVarKey: null };
                 if (compiled.view.dir) {
                     optionStr += `${optionStr.length > 2 ? "," : ''} dir:{`;
                     for (const dirName in compiled.view.dir) {
@@ -235,9 +255,10 @@ export function createRenderer(template: string, moduleId?: string) {
                         compiled.view.dir[dirName].forEach(dirValue => {
                             const rcKeys = handleLocalVar(compiled.localVars, dirValue);
                             dirBinding.value.push(dirValue.expStr)
-                            if (rcKeys.length > 0) {
-                                dirBinding.rcKeys = rcKeys;
+                            if (rcKeys.isAny()) {
+                                dirBinding.rcKeys = rcKeys.keys;
                                 isRcFound = true;
+                                localVarKey = rcKeys.localVar;
                             }
                             dirBinding.props = [...dirBinding.props, ...dirValue.keys]
                             dirBinding.params.push(dirValue.raw)
@@ -295,17 +316,18 @@ export function createRenderer(template: string, moduleId?: string) {
                             const val: IExpression = item.value as IExpression;
                             let rcKeys = handleLocalVar(compiled.localVars, val);
                             if (item.key === "'key'") {
-                                rcKeys = [];
+                                rcKeys = [] as any;
                             }
                             if (rcKeys.length > 0) {
                                 // rc[rcKey] = 1;
                                 isRcFound = true;
+                                localVarKey = rcKeys.localVar;
                             }
                             const getKey = () => {
                                 return val.keys.length > 0 ? convertArrayToString(val.keys) : null
                             }
                             const getRcKey = () => {
-                                return rcKeys.length > 0 ? convertArrayToString(rcKeys) : null
+                                return rcKeys.length > 0 ? convertArrayToString(rcKeys.keys) : null
                             }
                             const keyToWatch = getKey();
                             const strForKeyToWatch = keyToWatch ? `,k:${keyToWatch}` : ''
@@ -352,7 +374,7 @@ export function createRenderer(template: string, moduleId?: string) {
                 }
 
                 if (isRcFound) {
-                    optionStr += `${optionStr.length > 2 ? "," : ''} rcm:()=>addRc`;
+                    optionStr += `${optionStr.length > 2 ? "," : ''} rcm:()=>addRc_${localVarKey}`;
                 }
 
 
@@ -373,13 +395,13 @@ export function createRenderer(template: string, moduleId?: string) {
 
             const handleFor = (tagStr, optionStr) => {
                 let forExp = compiled.view.forExp;
-                const { keys } = forExp.value;
+
                 // const getRegex = (subStr) => {
                 //     return new RegExp(subStr, 'g');
                 // }
                 optionStr = optionStr || '{rAttr:{}}';
-                const method = `(${forExp.key},${forExp.index}, returnKey)=>{
-                    let addRc;
+                let method = `(${forExp.key},${forExp.index}, returnKey)=>{
+                    let addRc_${forExp.key};
                     const option = ${optionStr};
                     let attr = option.rAttr;
                     if(!attr){
@@ -390,7 +412,7 @@ export function createRenderer(template: string, moduleId?: string) {
                     }
                     return returnKey ? attr.key.v :  (()=>{ 
                         const rc = new Map();
-                        addRc= addRc_.bind(rc);
+                        addRc_${forExp.key}= addRc_.bind(rc);
                         const _el_ = ${tagStr + ','} option );
                         // stands for reactive child
                         _el_._rc_ = rc;
@@ -401,7 +423,32 @@ export function createRenderer(template: string, moduleId?: string) {
                     })()
             
                 }`;
-                return `...${CTX}[HANDLE_EXPRESSION](${method},${convertArrayToString(keys)},'for')`;
+                const { keys } = forExp.value;
+                const localVarResult = handleLocalVar(compiled.localVars, forExp.value);
+
+                const forExpKeys = keys.map(key => {
+                    for (const localVarKey in compiled.localVars) {
+                        if (key === localVarKey) {
+                            const localVarsValue = compiled.localVars[localVarKey];
+                            const forExp = localVarsValue['forExp'] as IForExp;
+                            return `(()=>{
+                               return '${forExp.value.raw}.'+ ${forExp.index};
+                            })()`
+                        }
+                    }
+                    return key;
+                })
+
+
+                let forExpStr = `${CTX}[HANDLE_EXPRESSION](${method},${convertArrayToString(forExpKeys)},'for')`;
+                if (localVarResult.isAny()) {
+                    const expression = `()=> ${forExpStr}`
+                    forExpStr = `...hfewrc(${convertArrayToString(localVarResult.keys)},${expression},addRc_${localVarResult.localVar})`
+                }
+                else {
+                    forExpStr = "..." + forExpStr;
+                }
+                return forExpStr;
                 //return forStr;
             }
             const ifModified = compiled.view.ifExpModified;
@@ -409,11 +456,13 @@ export function createRenderer(template: string, moduleId?: string) {
                 let allKeys = [];
                 let method = '';
                 const depKeys = [];
+                let localVarForRc;
                 const addDependency = (expression: IExpression) => {
                     const rcKeys = handleLocalVar(compiled.localVars, expression);
                     // const depKey = replaceDependent(expStr, dependent);
                     if (rcKeys.length > 0) {
-                        depKeys.push(...rcKeys);
+                        depKeys.push(...rcKeys.keys);
+                        localVarForRc = rcKeys.localVar;
                     }
                 }
                 (() => {
@@ -439,7 +488,7 @@ export function createRenderer(template: string, moduleId?: string) {
                 }
                 method += `:${elseString} }`
                 if (depKeys.length > 0) {
-                    let wrapperMethod = `hewrc(${convertArrayToString(depKeys)}, ${method}, addRc)`;
+                    let wrapperMethod = `hewrc(${convertArrayToString(depKeys)}, ${method}, addRc_${localVarForRc})`;
                     method = wrapperMethod;
                 }
                 if (allKeys.length > 0) {
@@ -483,7 +532,7 @@ export function createRenderer(template: string, moduleId?: string) {
 
             // const depKey = replaceDependent(expStr, dependent);
             if (rcKeys.length > 0) {
-                let wrapperMethod = `ctwrc(${convertArrayToString(rcKeys)},${expForMustacheContent},addRc)`
+                let wrapperMethod = `ctwrc(${convertArrayToString(rcKeys.keys)},${expForMustacheContent},addRc_${rcKeys.localVar})`
                 expForMustacheContent = wrapperMethod;
             }
 
