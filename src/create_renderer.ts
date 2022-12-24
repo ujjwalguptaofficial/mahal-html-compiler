@@ -167,6 +167,9 @@ export function createRenderer(template: string, moduleId?: string) {
                         }
                         const ifExp = child.view.ifExp;
                         if (ifExp.ifCond) {
+                            if (ifModifiedExpression) {
+                                onIfCondEnd(index);
+                            }
                             isIfCondEndFound = false;
                             ifModifiedExpression = {
                                 ifExp: ifExp.ifCond,
