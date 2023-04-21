@@ -331,7 +331,7 @@ ExpressionValue = val : AnyValue _*{
     return val;
   }
   if(val.__isProp__){
-    return {keys:[val.pre + val.value], raw: val.pre + val.value, expStr: val.pre + "ctx." + val.value}
+    return {keys:[(val.pre + val.value).replace(/[!]/,'')], raw: val.pre + val.value, expStr: val.pre + "ctx." + val.value}
   }
   return {keys:[],raw:val,expStr:val}
 }
