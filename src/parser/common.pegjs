@@ -4,64 +4,69 @@
   return /^\s*$/.test(str);
 }
  const handleHtmlOpen = (word,option)=>{
+   const meta = {
+      events:[],
+     attr:[],
+     dir:{},
+     };
    const result = {
      tag:word || 'fragment',
-     events:[],
-     attr:[],
-     dir:{}
-  }
+     type:"opening_tag",
+     meta
+  };
   option.forEach(val=>{
     const key = val?Object.keys(val)[0]:null;
     switch(key){
       case 'event':
-        result.events.push(val[key]);break;
+        meta.events.push(val[key]);break;
       case 'attr':
-        result.attr.push(val[key]);break;
+        meta.attr.push(val[key]);break;
        case 'dir':
          const dirValue = val[key];
-         result.dir[dirValue.name]=dirValue.value;
+         meta.dir[dirValue.name]=dirValue.value;
          break;
       case null:
         break;
       default:
-        result[key] = val[key]   
+        meta[key] = val[key]   
     }
   });
-  if(Object.keys(result.dir).length===0){
-     delete result.dir;
+  if(Object.keys(meta.dir).length===0){
+     delete meta.dir;
   }
  return result;
  }
 }
-HtmlTag = HtmlTagClosing/HtmlTagSelfClosing/HtmlComment/HtmlPreTag
 
-HtmlComment = HtmlCommentStart word:CommentContent  "-->" {
-  return {
-    view:{
-       tag:null,
-       events:[],
-       attr:[]
-    },
-    child:[word]
-  }
-}
-
-HtmlCommentStart "<!--" = "<!--"
-
-
-CommentContent "comment content" = word: (!"-->" c:. {return c})* {
- return word.join('')
-}
-
-
-HtmlTagClosing = openTag:HtmlOpen GtSymbol child:(HtmlTag/Html/MustacheExpression)* closeTag:CloseTag {
- const openTagValue = openTag.tag;
- if (openTagValue != closeTag) {
-        error("Expected </" + openTagValue + "> but </" + closeTag + "> found.");
-  }
-  return {
-   view:openTag,
-   child: child.filter((item,index)=> {
+HtmlTag = content: HtmlContent+ {
+  const results = []
+  let result = {};
+  let rootElementExited=false;
+  //return content;
+  content.forEach((item,index)=>{
+    switch(item.type){
+      case "opening_tag":
+         result = {};
+         result.view = {
+            tag: item.tag,
+            ...item.meta
+         };
+         result.child=[];
+         if(rootElementExited){
+           error("Only one root element allowed per component");
+         }
+         results.push(result);
+         break;
+      case "closing_tag":
+       result = results.pop();
+       const openTagValue = result.view.tag;
+       const closeTagValue = item.tag;
+       if(result.view.tag!== closeTagValue){
+         error("Expected </" + openTagValue + "> but </" + closeTagValue + "> found.");
+       }
+       
+        const child = result.child;
+      result.child = child.filter((item,index)=> {
       if(typeof item==='string'){
          if(onlySpaces(item)){
             const nextChild = child[index+1];
@@ -74,14 +79,78 @@ HtmlTagClosing = openTag:HtmlOpen GtSymbol child:(HtmlTag/Html/MustacheExpressio
       }
       return true;
       
-   })
+   });
+       
+       if(results.length>0){
+         const lastChild = result;
+         result = results[results.length-1];
+         result.child.push(lastChild);
+       }
+       else{
+        rootElementExited = true;
+       }
+     
+       break;
+      case 'comment':
+      case 'pre':
+      case "self_closing":
+        const view = {
+          view: {
+           tag:item.data.tag,
+           ...item.data.meta
+          },
+          child: item.data.child || []
+        };
+         if(rootElementExited){
+           error("Only one root element allowed per component");
+         }
+        if(result.child){
+          result.child.push(view);
+        }
+        else{
+         result = view;
+        }
+         break;
+      default:
+         if(result.child){
+            result.child.push(item);
+         }
+    }
+  })
+  return result;
+}
+
+HtmlComment = HtmlCommentStart word:CommentContent  "-->" {
+  return {
+    data:{
+       tag:null,
+       meta:{
+         events:[],
+         attr:[]
+       },
+       child:[word],
+    },
+    type: "comment"
   }
 }
 
+HtmlCommentStart "<!--" = "<!--"
+
+
+CommentContent "comment content" = word: (!"-->" c:. {return c})* {
+ return word.join('')
+}
+
+HtmlContentTag = openTag:HtmlOpen GtSymbol {
+   return openTag
+}
+
+HtmlContent = HtmlPreTag/HtmlContentTag/HtmlTagSelfClosing/HtmlComment/Html/MustacheExpression/CloseTag
+
 HtmlTagSelfClosing = openTag:HtmlOpenSelfClosing "/" GtSymbol {
   return {
-    view:openTag,
-    child:[]
+    data:openTag,
+    type: "self_closing"
   }
 }
 
@@ -94,9 +163,11 @@ HtmlOpen = LtSymbol word: XmlTag?  option:(HtmlOpenOption)* {
 }
 
 HtmlPreTag = LtSymbol "pre"  option:(HtmlOpenOption)* GtSymbol content:( !"</pre>" c:. {return c})* "</pre>" {
+ const data = handleHtmlOpen("pre",option);
+ data.child = [content.join('')];
  return {
-   view: handleHtmlOpen("pre",option),
-   child: [content.join('')]
+   data:data,
+   type:"pre"
   }
 }
 
@@ -112,7 +183,10 @@ HtmlOpenOption = value:((If/ElseIf/Else)/For/(Event)/Attribute/Directive/NewLine
 }
 
 CloseTag "close tag"= StartCloseTag word: XmlTag? GtSymbol{
-  return word || 'fragment'
+  return {
+    tag:word || 'fragment',
+    type:"closing_tag"
+  }
 }
 
 

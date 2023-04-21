@@ -32,7 +32,8 @@ describe('For loop', function () {
             <div :for(item in items)>
                 {{item}}
             </div>
-        `)
+        `);
+            done();
         }).catch(() => {
             done();
         })

@@ -26,7 +26,7 @@ describe('If', function () {
             <div :else ></div>
             `)
         } catch (error) {
-            expect(error.message).to.be.equal(`Expected end of input but "\\n" found.`)
+            expect(error.message).to.be.equal(`Only one root element allowed per component`)
         }
 
     })

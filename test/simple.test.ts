@@ -233,6 +233,16 @@ describe('simple', function () {
         expect(btn.textContent).equal(text.replace('<pre>', '').replace('</pre>', ''));
     })
 
+    it('pre tag under div', async () => {
+        const text = `<div>
+        <pre>fff</pre>
+        </div>`;
+        const compClass = createComponent(text);
+        const component = await mount(compClass);
+        const btn = component.element;
+        expect(btn.tagName).equal('DIV');
+    })
+
     it('pre tag opposite', async () => {
         const text = `<div>
         dddd {{name}}
