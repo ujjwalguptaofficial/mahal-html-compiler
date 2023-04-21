@@ -1,7 +1,7 @@
 {
   "name": "@mahaljs/html-compiler",
   "displayName": "mahal-html-compiler",
-  "version": "1.8.6",
+  "version": "1.9.0",
   "description": "Html compiler for mahal framework",
   "main": "dist/npm.export.js",
   "types": "dist/ts/index.d.ts",
@@ -47,7 +47,7 @@
     "copy-webpack-plugin": "^6.1.1",
     "cross-env": "^7.0.3",
     "del-cli": "^4.0.1",
-    "mahal": "^1.8.5",
+    "mahal": "^1.9.0",
     "mocha": "^8.2.1",
     "mochapack": "^2.0.6",
     "pegjs": "^0.10.0",
